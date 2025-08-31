@@ -31,31 +31,51 @@ class GeophysicalDataCleaner:
     def clean_all_devices(self) -> Dict[str, Tuple[Path, Dict]]:
         """
         Nettoyer les données de tous les dispositifs géophysiques.
+        Seuls les fichiers CSV sont acceptés.
         
         Returns:
             Dict associant les noms des dispositifs aux tuples (clean_path, report)
         """
+        # Valider d'abord tous les fichiers d'entrée
+        logger.info("Validation des fichiers d'entrée...")
+        validation_results = self.validate_all_input_files()
+        
+        # Vérifier qu'il y a au moins un fichier CSV valide
+        valid_files = [name for name, is_valid in validation_results.items() if is_valid]
+        if not valid_files:
+            raise ValueError("Aucun fichier CSV valide trouvé. Le modèle ne peut pas fonctionner sans données d'entrée.")
+        
+        logger.info(f"Fichiers CSV valides trouvés: {valid_files}")
+        
         results = {}
         
         for device_name, device_config in CONFIG.geophysical_data.devices.items():
+            # Ne traiter que les fichiers validés
+            if not validation_results.get(device_name, False):
+                logger.warning(f"Fichier {device_name} non valide, ignoré")
+                continue
+                
             logger.info(f"Nettoyage des données pour le dispositif: {device_name}")
             
             raw_file = self.raw_data_dir / device_config['file']
-            if raw_file.exists():
+            
+            try:
                 clean_path, report = self._clean_device_data(device_name, raw_file)
                 results[device_name] = (clean_path, report)
-            else:
-                logger.warning(f"Fichier de données brutes non trouvé: {raw_file}")
+            except ValueError as e:
+                logger.error(f"Erreur lors du traitement de {device_name}: {e}")
+                continue
                 
         return results
 
     def _clean_device_data(self, device_name: str, raw_file: Path) -> Tuple[Path, Dict]:
         """
         Clean data for a specific device.
+        Seuls les fichiers CSV sont acceptés.
         
         Args:
             device_name: Name of the device
-            raw_file: Path to raw data file
+            raw_file: Path to raw data file (doit être un CSV)
             
         Returns:
             Tuple of (clean_path, cleaning_report)
@@ -65,6 +85,10 @@ class GeophysicalDataCleaner:
         if clean_file.exists():
             logger.info(f"Cleaned data already exists for {device_name}, skipping cleaning")
             return clean_file, {}
+        
+        # Valider le format CSV avant de charger les données
+        if not self._validate_csv_format(raw_file):
+            raise ValueError(f"Le fichier {raw_file} n'est pas un CSV valide")
         
         # Load raw data
         df = self._load_device_data(raw_file, device_name)
@@ -98,17 +122,42 @@ class GeophysicalDataCleaner:
         return clean_file, report
 
     def _load_device_data(self, file_path: Path, device_name: str) -> pd.DataFrame:
-        """Load data based on device type and file format."""
-        if file_path.suffix == '.csv':
-            df = pd.read_csv(file_path)
-        elif file_path.suffix == '.dat':
-            # Handle .dat files (space or tab separated)
-            df = pd.read_csv(file_path, sep=r'\s+', engine='python')
-        else:
-            raise ValueError(f"Unsupported file format: {file_path.suffix}")
+        """Load data from CSV files only."""
+        if file_path.suffix.lower() != '.csv':
+            raise ValueError(f"Seuls les fichiers CSV sont supportés. Format détecté: {file_path.suffix}")
         
-        logger.debug(f"Loaded {len(df)} records from {file_path}")
-        return df
+        try:
+            # Essayer d'abord avec le séparateur par défaut (virgule)
+            df = pd.read_csv(file_path)
+            
+            # Si une seule colonne, essayer avec point-virgule
+            if len(df.columns) == 1:
+                logger.info(f"Fichier {file_path} semble utiliser des points-virgules comme séparateur")
+                df = pd.read_csv(file_path, sep=';')
+            
+            logger.debug(f"Loaded {len(df)} records from {file_path}")
+            return df
+        except Exception as e:
+            raise ValueError(f"Erreur lors de la lecture du fichier CSV {file_path}: {str(e)}")
+
+    def _validate_csv_format(self, file_path: Path) -> bool:
+        """Valider que le fichier est un CSV valide."""
+        try:
+            # Essayer de lire les premières lignes pour vérifier le format
+            with open(file_path, 'r', encoding='utf-8') as f:
+                first_lines = [f.readline() for _ in range(5)]
+            
+            # Vérifier qu'il y a des virgules ou points-virgules (séparateurs CSV)
+            has_separators = any(',' in line or ';' in line for line in first_lines if line.strip())
+            
+            if not has_separators:
+                logger.warning(f"Le fichier {file_path} ne semble pas contenir de séparateurs CSV valides")
+                return False
+                
+            return True
+        except Exception as e:
+            logger.error(f"Erreur lors de la validation du format CSV de {file_path}: {e}")
+            return False
 
     def _validate_columns(self, df: pd.DataFrame, device_name: str) -> pd.DataFrame:
         """Ensure required columns are present."""
@@ -253,6 +302,40 @@ class GeophysicalDataCleaner:
             }
         
         return ranges
+
+    def validate_all_input_files(self) -> Dict[str, bool]:
+        """
+        Valider que tous les fichiers d'entrée sont des CSV valides.
+        
+        Returns:
+            Dict associant les noms des dispositifs à leur statut de validation
+        """
+        validation_results = {}
+        
+        for device_name, device_config in CONFIG.geophysical_data.devices.items():
+            raw_file = self.raw_data_dir / device_config['file']
+            
+            if not raw_file.exists():
+                validation_results[device_name] = False
+                logger.warning(f"Fichier non trouvé pour {device_name}: {raw_file}")
+                continue
+            
+            # Vérifier l'extension
+            if raw_file.suffix.lower() != '.csv':
+                validation_results[device_name] = False
+                logger.error(f"Format non supporté pour {device_name}: {raw_file.suffix} (CSV requis)")
+                continue
+            
+            # Valider le contenu CSV
+            is_valid_csv = self._validate_csv_format(raw_file)
+            validation_results[device_name] = is_valid_csv
+            
+            if is_valid_csv:
+                logger.info(f"✓ {device_name}: CSV valide")
+            else:
+                logger.error(f"✗ {device_name}: CSV invalide")
+        
+        return validation_results
 
     def get_cleaning_summary(self) -> Dict:
         """Get a summary of all cleaning operations."""

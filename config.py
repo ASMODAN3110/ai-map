@@ -23,28 +23,16 @@ class GeophysicalDataConfig:
     """
     # Configurations des dispositifs
     devices = {
-        'pole_pole': {
-            'file': 'profil 1.csv',
-            'measurements': 164,
-            'coverage': (950, 450),
-            'features': ['resistivity', 'chargeability']
-        },
         'pole_dipole': {
-            'file': 'PD_Line1s.dat',
-            'measurements': 144,
+            'file': 'PD.csv',  # Fichier CSV réel qui existe
+            'measurements': 229,
             'coverage': (1000, 'moderate'),
             'features': ['resistivity', 'chargeability']
         },
-        'schlumberger_6': {
-            'file': 'PRO 6 COMPLET.csv',
-            'measurements': 469,
+        'schlumberger': {
+            'file': 'S.csv',  # Fichier CSV réel qui existe
+            'measurements': 781,
             'coverage': (945, 94),
-            'features': ['resistivity', 'chargeability']
-        },
-        'schlumberger_7': {
-            'file': 'PRO 7 COMPLET.csv',
-            'measurements': 100,
-            'coverage': (180, 31),
             'features': ['resistivity', 'chargeability']
         }
     }
@@ -125,7 +113,7 @@ class WebAppConfig:
     # Upload de fichiers
     max_file_size: int = 100 * 1024 * 1024  # 100MB
     allowed_extensions: List[str] = field(default_factory=lambda: [
-        '.csv', '.dat', '.bin', '.txt'
+        '.csv'  # Seuls les fichiers CSV sont autorisés
     ])
 
 @dataclass
