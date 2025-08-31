@@ -100,6 +100,7 @@ jupyter notebook notebooks/phase1/01_data_exploration.ipynb
 2. **Transformation des coordonnées** : LAT/LON → UTM
 3. **Normalisation** : Résistivité (log), chargeabilité (min-max)
 4. **Création des grilles spatiales** : 2D (64×64) et 3D (32×32×32)
+5. **Augmentation des données** : Techniques géométriques, bruit, variations (✅ Nouveau!)
 
 ### Phase 2: Modèles CNN (🔄 En cours)
 1. **Implémentation U-Net 2D**
