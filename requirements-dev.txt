@@ -1,0 +1,72 @@
+# Requirements de développement pour le projet AI-Map
+# =============================================================================
+# Ce fichier contient les dépendances nécessaires uniquement pour le développement
+# et les tests. Pour la production, utilisez requirements.txt
+
+# Testing & Development
+pytest>=7.0.0
+pytest-cov>=4.0.0
+pytest-mock>=3.8.0
+pytest-xdist>=2.5.0  # Tests parallèles
+pytest-html>=3.1.0   # Rapports HTML
+pytest-benchmark>=4.0.0  # Tests de performance
+unittest-mock>=1.0.0
+
+# Code Quality & Linting
+black>=22.0.0
+black[jupyter]>=22.0.0
+flake8>=4.0.0
+isort>=5.10.0
+mypy>=0.950
+pylint>=2.14.0
+bandit>=1.7.0  # Sécurité
+safety>=2.3.0  # Vulnérabilités
+
+# Documentation
+sphinx>=5.0.0
+sphinx-rtd-theme>=1.0.0
+sphinx-autodoc-typehints>=1.18.0
+myst-parser>=0.17.0
+
+# Development Tools
+pre-commit>=2.20.0
+jupyter>=1.0.0
+ipykernel>=6.0.0
+notebook>=6.4.0
+ipython>=8.0.0
+
+# Code Coverage & Analysis
+coverage>=6.3.0
+codecov>=2.1.0
+radon>=5.1.0  # Métriques de code
+xenon>=0.7.0  # Complexité cyclomatique
+
+# Debugging & Profiling
+ipdb>=0.13.0
+memory-profiler>=0.60.0
+line-profiler>=3.5.0
+py-spy>=0.3.0  # Profiling système
+
+# Type Checking
+types-requests>=2.28.0
+types-PyYAML>=6.0.0
+types-setuptools>=65.0.0
+
+# =============================================================================
+# Installation Instructions:
+# =============================================================================
+# 
+# 1. Installer les dépendances de base:
+#    pip install -r requirements.txt
+#    
+# 2. Installer les dépendances de développement:
+#    pip install -r requirements-dev.txt
+#    
+# 3. Configurer pre-commit:
+#    pre-commit install
+#    
+# 4. Vérifier l'installation:
+#    pytest --version
+#    black --version
+#    flake8 --version
+# =============================================================================

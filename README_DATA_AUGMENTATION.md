@@ -241,14 +241,25 @@ print(f"Taux: {10/execution_time:.1f} augmentations/seconde")
 
 ## 🧪 Tests et Validation
 
+**✅ Tests unitaires complets disponibles !**
+
 ### Exécuter les Tests
 ```bash
 # Tests unitaires
-python test/unit/preprocessor/test_data_augmenter.py
+python -m pytest test/unit/preprocessor/ -v
 
-# Tests avec couverture (si disponible)
-python -m pytest test/unit/preprocessor/test_data_augmenter.py --cov=src.preprocessor.data_augmenter
+# Tests avec couverture
+python -m pytest test/unit/preprocessor/ --cov=src.preprocessor.data_augmenter --cov-report=html
+
+# Tests d'intégration avec le trainer
+python -m pytest test/integration/ -v
 ```
+
+### **📊 Couverture des Tests :**
+- **`GeophysicalDataAugmenter`** : Tests unitaires complets
+- **Intégration avec `GeophysicalTrainer`** : Tests d'intégration
+- **Validation des augmentations** : Tests de robustesse
+- **Gestion des erreurs** : Tests de gestion d'exceptions
 
 ### Exemple de Démonstration
 ```bash

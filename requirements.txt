@@ -1,0 +1,133 @@
+# Requirements pour le projet AI-Map - Imagerie Géophysique avec Deep Learning
+# =============================================================================
+
+# Core Deep Learning Framework
+torch>=2.0.0
+torchvision>=0.15.0
+torchaudio>=2.0.0
+
+# Scientific Computing & Data Processing
+numpy>=1.21.0
+pandas>=1.3.0
+scipy>=1.7.0
+
+# Machine Learning & Evaluation
+scikit-learn>=1.0.0
+matplotlib>=3.5.0
+seaborn>=0.11.0
+
+# Data Visualization & Plotting
+plotly>=5.0.0
+kaleido>=0.2.1  # Pour l'export des graphiques Plotly
+
+# Image Processing
+Pillow>=8.3.0
+opencv-python>=4.5.0
+
+# Geophysical Data Processing
+geopy>=2.2.0
+rasterio>=1.2.0
+fiona>=1.8.0
+shapely>=1.8.0
+
+# Configuration & Environment
+python-dotenv>=0.19.0
+pyyaml>=6.0
+configparser>=5.2.0
+
+# Logging & Monitoring
+loguru>=0.6.0
+tensorboard>=2.8.0
+wandb>=0.13.0  # Weights & Biases pour le suivi d'expériences
+
+# Testing & Development
+pytest>=7.0.0
+pytest-cov>=4.0.0
+pytest-mock>=3.8.0
+unittest-mock>=1.0.0
+
+# Code Quality & Linting
+black>=22.0.0
+flake8>=4.0.0
+isort>=5.10.0
+mypy>=0.950
+
+# Documentation
+sphinx>=5.0.0
+sphinx-rtd-theme>=1.0.0
+
+# Jupyter & Interactive Development
+jupyter>=1.0.0
+ipykernel>=6.0.0
+notebook>=6.4.0
+
+# Utilities
+tqdm>=4.64.0
+click>=8.1.0
+rich>=12.0.0
+colorama>=0.4.5
+
+# Data Validation & Schema
+pydantic>=1.9.0
+marshmallow>=3.17.0
+
+# Performance & Optimization
+numba>=0.56.0
+joblib>=1.1.0
+multiprocessing-logging>=0.3.0
+
+# File I/O & Formats
+h5py>=3.7.0
+netCDF4>=1.6.0
+xarray>=2022.3.0
+
+# Geospatial & Mapping
+folium>=0.12.0
+geopandas>=0.11.0
+contextily>=1.2.0
+
+# Development Tools
+pre-commit>=2.20.0
+black[jupyter]>=22.0.0
+
+# Optional: GPU Support (décommentez si vous avez une GPU NVIDIA)
+# nvidia-ml-py3>=7.352.0
+# cupy-cuda11x>=10.0.0  # Remplacer par votre version CUDA
+
+# Optional: Advanced Visualization
+# bokeh>=2.4.0
+# holoviews>=1.15.0
+# panel>=0.14.0
+
+# Optional: Database Support
+# sqlalchemy>=1.4.0
+# psycopg2-binary>=2.9.0  # PostgreSQL
+# pymongo>=4.0.0  # MongoDB
+
+# Optional: Cloud & Deployment
+# boto3>=1.24.0  # AWS
+# google-cloud-storage>=2.0.0  # Google Cloud
+# azure-storage-blob>=12.0.0  # Azure
+
+# =============================================================================
+# Installation Instructions:
+# =============================================================================
+# 
+# 1. Créer un environnement virtuel:
+#    python -m venv venv
+#    
+# 2. Activer l'environnement:
+#    # Windows:
+#    venv\Scripts\activate
+#    # Linux/Mac:
+#    source venv/bin/activate
+#    
+# 3. Installer les dépendances:
+#    pip install -r requirements.txt
+#    
+# 4. Pour le développement uniquement:
+#    pip install -r requirements.txt[dev]
+#    
+# 5. Vérifier l'installation:
+#    python -c "import torch, numpy, pandas; print('Installation réussie!')"
+# =============================================================================

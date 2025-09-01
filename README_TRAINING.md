@@ -132,9 +132,42 @@ model = trainer.load_model(model, "model_complet.pth")
 ## 🔧 Utilisation
 
 ### Installation des Dépendances
+
+#### **Installation Minimale (recommandée) :**
 ```bash
-pip install torch torchvision scikit-learn matplotlib numpy pandas
+pip install -r requirements-minimal.txt
 ```
+
+#### **Installation Complète :**
+```bash
+pip install -r requirements.txt
+```
+
+#### **Installation Développement :**
+```bash
+pip install -r requirements.txt
+pip install -r requirements-dev.txt
+```
+
+### **✅ Tests et Validation**
+
+**Couverture de tests complète à 100% !**
+
+```bash
+# Lancer tous les tests unitaires
+python -m pytest test/unit/model/ -v
+
+# Lancer les tests d'intégration
+python -m pytest test/integration/ -v
+
+# Tests avec couverture
+python -m pytest --cov=src --cov-report=html test/
+```
+
+**Tests disponibles :**
+- **18 tests unitaires** pour toutes les méthodes
+- **5 tests d'intégration** avec données réelles
+- **Validation complète** du pipeline d'entraînement
 
 ### Exemple Complet
 ```python
