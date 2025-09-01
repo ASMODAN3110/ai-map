@@ -102,6 +102,66 @@ python main.py
 jupyter notebook notebooks/phase1/01_data_exploration.ipynb
 ```
 
+### **🖼️ Utilisation avec Images Géophysiques**
+
+#### **1. Traitement d'Images Simple**
+```python
+from src.data.image_processor import GeophysicalImageProcessor
+
+# Créer le processeur
+processor = GeophysicalImageProcessor(target_size=(64, 64), channels=3)
+
+# Traiter une image
+tensor = processor.process_image("carte_resistivite.png")
+print(f"Forme du tenseur: {tensor.shape}")  # torch.Size([1, 3, 64, 64])
+
+# Extraire des features géophysiques
+features = processor.extract_geophysical_features("carte_resistivite.png")
+print(f"Intensité moyenne: {features['mean_intensity']}")
+print(f"Magnitude du gradient: {features['gradient_magnitude']}")
+```
+
+#### **2. Modèle Hybride Images + Données**
+```python
+from src.model.geophysical_hybrid_net import create_hybrid_model
+
+# Créer le modèle hybride
+model = create_hybrid_model(
+    num_classes=2,
+    image_model="resnet18",
+    geo_input_dim=5,
+    fusion_method="attention"
+)
+
+# Prédiction
+images = torch.randn(4, 3, 64, 64)      # 4 images RGB 64x64
+geo_data = torch.randn(4, 5)             # 4 échantillons géophysiques
+predictions = model(images, geo_data)     # Prédictions de classification
+```
+
+#### **3. Entraînement Complet**
+```python
+from src.model.geophysical_image_trainer import create_hybrid_trainer
+
+# Créer le trainer
+trainer = create_hybrid_trainer(augmenter)
+
+# Préparer les données hybrides
+train_loader, val_loader = trainer.prepare_hybrid_data(
+    image_paths, geo_data, labels,
+    augmentations=["rotation", "flip_horizontal"]
+)
+
+# Entraîner le modèle
+history = trainer.train_hybrid_model(model, train_loader, val_loader)
+```
+
+#### **4. Exemple Complet**
+```bash
+# Lancer la démonstration complète
+python examples/hybrid_image_geophysics_example.py
+```
+
 ## 📊 Pipeline de Traitement
 
 ### Phase 1: Prétraitement (✅ Implémentée)
@@ -138,6 +198,27 @@ jupyter notebook notebooks/phase1/01_data_exploration.ipynb
 - **18 tests unitaires** pour toutes les classes principales
 - **5 tests d'intégration** avec données réelles (PD.csv, S.csv)
 - **Couverture 100%** de toutes les méthodes critiques
+
+### **🖼️ Traitement d'Images Géophysiques :**
+- **Processeur d'images** complet avec support multi-formats (JPG, PNG, TIFF, etc.)
+- **Extraction de features géophysiques** (gradients, histogrammes, textures)
+- **Augmentation d'images** spécialisée (rotation, flip, luminosité, contraste)
+- **Prétraitement automatique** pour CNN (redimensionnement, normalisation)
+- **Support RGB et grayscale** avec normalisation ImageNet
+
+### **🧠 Modèle CNN Hybride :**
+- **Encodeur d'images** basé sur ResNet (18/34/50) pré-entraîné
+- **Encodeur de données géophysiques** avec couches denses
+- **3 méthodes de fusion** : concaténation, attention, pondération
+- **Architecture modulaire** et extensible
+- **Support multi-classes** et configuration flexible
+
+### **🚀 Trainer Étendu pour Images :**
+- **Gestionnaire de données hybrides** (images + géophysiques)
+- **Pipeline d'entraînement complet** avec callbacks avancés
+- **Early stopping** et sauvegarde automatique des meilleurs modèles
+- **Métriques d'évaluation** détaillées (accuracy, loss, confusion matrix)
+- **Support GPU/CPU** automatique
 
 ### **✅ Processeur de Données Géophysiques :**
 - **Interpolation spatiale** intelligente (algorithme du plus proche voisin)

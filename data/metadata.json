@@ -1,0 +1,155 @@
+{
+  "project": "AI-MAP - Intelligence Artificielle pour Images de Cartes Géologiques",
+  "description": "Projet d'IA pour l'analyse et la classification d'images de cartes géologiques et géophysiques",
+  "data_organization": {
+    "train_ratio": 0.8,
+    "test_ratio": 0.2,
+    "random_seed": 42,
+    "organization_date": "2025-01-09"
+  },
+  "data_structure": {
+    "raw": {
+      "images": {
+        "resistivity": {
+          "description": "Images de résistivité géophysique à différentes profondeurs",
+          "files": [
+            "resis au niveau 0.JPG",
+            "resis au niveau 20.JPG", 
+            "resis au niveau 30m.JPG",
+            "resis au niveau 50m.JPG",
+            "resis au niveau 70m.JPG",
+            "resis au niveau 85m.JPG",
+            "resis au niveau 100m.JPG",
+            "resis au niveau 150m.JPG",
+            "resis1.JPG",
+            "resis2.JPG",
+            "resis3.JPG",
+            "resis4.JPG",
+            "resis8.JPG",
+            "resis9.JPG",
+            "resis10.JPG",
+            "resis11.JPG",
+            "resis12.JPG",
+            "resis13.JPG",
+            "resis14.JPG",
+            "resis15.JPG"
+          ],
+          "total_files": 20
+        },
+        "chargeability": {
+          "description": "Images de chargeabilité géophysique",
+          "files": [
+            "char_1.PNG",
+            "char_2.PNG",
+            "char_3.PNG", 
+            "char_4.PNG",
+            "char_5.PNG",
+            "char9.JPG",
+            "char10.JPG",
+            "char11.JPG",
+            "char12.JPG",
+            "char14.JPG",
+            "char15.JPG"
+          ],
+          "total_files": 11
+        },
+        "profiles": {
+          "description": "Images de profils géologiques numérotés",
+          "files": [
+            "11.JPG",
+            "12.JPG",
+            "13.JPG",
+            "13'.JPG",
+            "14.JPG",
+            "15.JPG"
+          ],
+          "total_files": 6
+        }
+      },
+      "csv": {
+        "profiles": {
+          "description": "Données CSV des profils géophysiques",
+          "files": [
+            "profil 1.csv",
+            "profil 2.csv",
+            "profil 3.csv",
+            "profil 5.csv",
+            "profil 6.csv",
+            "profil 7.csv",
+            "profil 8.csv",
+            "profil 9.csv",
+            "profil 10.csv",
+            "profil 11.csv",
+            "profil 12.csv",
+            "profil 13.csv",
+            "profil 14.csv",
+            "profil 15.csv"
+          ],
+          "total_files": 14
+        }
+      }
+    },
+    "training": {
+      "description": "Données pour l'entraînement du modèle (80%)",
+      "images": {
+        "resistivity": "Images de résistivité pour l'entraînement",
+        "chargeability": "Images de chargeabilité pour l'entraînement",
+        "profiles": "Images de profils pour l'entraînement"
+      },
+      "csv": "Fichiers CSV pour l'entraînement"
+    },
+    "test": {
+      "description": "Données pour les tests du modèle (20%)",
+      "images": {
+        "resistivity": "Images de résistivité pour les tests",
+        "chargeability": "Images de chargeabilité pour les tests", 
+        "profiles": "Images de profils pour les tests"
+      },
+      "csv": "Fichiers CSV pour les tests"
+    }
+  },
+  "file_types": {
+    "images": [".JPG", ".PNG"],
+    "data": [".csv"]
+  },
+  "usage": {
+    "training": "Entraînement des modèles CNN pour la classification géologique",
+    "test": "Évaluation des performances et validation des modèles",
+    "augmentation": "Utilisation avec ImageAugmenter pour augmenter le dataset",
+    "preprocessing": "Nettoyage et prétraitement des images géophysiques"
+  },
+  "geophysical_data": {
+    "resistivity": {
+      "description": "Mesures de résistivité électrique du sous-sol",
+      "units": "Ohm.m",
+      "depth_levels": [0, 20, 30, 50, 70, 85, 100, 150],
+      "application": "Détection de structures géologiques, nappes phréatiques, minéralisation"
+    },
+    "chargeability": {
+      "description": "Mesures de chargeabilité électrique du sous-sol", 
+      "units": "mV/V",
+      "application": "Détection de minéralisation, argiles, structures polarisables"
+    },
+    "profiles": {
+      "description": "Profils géologiques combinant résistivité et chargeabilité",
+      "application": "Analyse intégrée des propriétés géophysiques du sous-sol"
+    }
+  },
+  "ai_model_usage": {
+    "image_classification": "Classification automatique des types de roches et structures",
+    "anomaly_detection": "Détection de structures géologiques anormales",
+    "geological_mapping": "Cartographie automatique des unités géologiques",
+    "data_quality_assessment": "Évaluation automatique de la qualité des données géophysiques"
+  },
+  "data_augmentation": {
+    "available_techniques": [
+      "rotation", "flip_horizontal", "flip_vertical",
+      "brightness", "contrast", "elastic_deformation",
+      "color_jittering", "gaussian_noise", "blur_sharpen",
+      "perspective_transform", "cutout", "geological_stratification",
+      "fracture_patterns", "mineral_inclusions", "weathering_effects",
+      "sedimentary_layers"
+    ],
+    "purpose": "Augmenter le dataset d'entraînement pour améliorer la robustesse du modèle"
+  }
+}
