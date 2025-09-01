@@ -5,6 +5,15 @@ from typing import Tuple, Dict, List
 import pyproj
 from pyproj import Transformer
 
+import os
+import sys
+from pathlib import Path
+
+# Ajouter le répertoire racine au path de manière plus robuste
+current_dir = Path(__file__).resolve().parent
+project_root = current_dir.parent.parent
+sys.path.insert(0, str(project_root))
+
 from config import CONFIG
 from src.utils.logger import logger
 
