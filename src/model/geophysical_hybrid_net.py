@@ -464,6 +464,9 @@ def get_model_summary(model: GeophysicalHybridNet) -> Dict[str, Any]:
     return summary
 
 
+
+
+
 if __name__ == "__main__":
     # Test du modèle
     model = GeophysicalHybridNet(
