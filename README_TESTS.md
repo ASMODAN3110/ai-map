@@ -8,20 +8,34 @@ Ce guide documente la suite de tests complète du projet AI-Map, incluant les te
 
 ### **🎯 Classes Testées (100% couverture) :**
 
-#### **1. `GeophysicalTrainer` - 14/14 méthodes ✅**
-- **Tests unitaires** : 18 tests complets
-- **Méthodes couvertes** : `__init__`, `prepare_data_2d`, `prepare_data_3d`, `prepare_data_dataframe`, `train_model`, `evaluate_model`, `save_model`, `load_model`, `plot_training_history`, `get_augmentation_summary`, `validate_augmentations_for_data_type`, `reset_training_history`
+#### **1. `GeophysicalTrainer` - 18/18 méthodes ✅**
+- **Tests unitaires** : 108 tests complets répartis sur 7 fichiers
+- **Fichiers de test** : 
+  - `test_geophysical_trainer.py` (18 tests)
+  - `test_geophysical_trainer_evaluate_model.py` (15 tests)
+  - `test_geophysical_trainer_save_model.py` (11 tests)
+  - `test_geophysical_trainer_load_model.py` (12 tests)
+  - `test_geophysical_trainer_plot_training_history.py` (18 tests)
+  - `test_geophysical_trainer_train_model.py` (16 tests)
+  - `test_geophysical_trainer_utility_methods.py` (18 tests)
 
 #### **2. `GeophysicalDataProcessor` - 8/8 méthodes ✅**
 - **Tests unitaires** : 18 tests complets
 - **Méthodes couvertes** : `__init__`, `load_and_validate`, `_create_2d_grid`, `create_spatial_grids`, `create_multi_device_tensor`, `create_3d_volume`, `split_data`, `get_data_summary`
 
-#### **3. Modèles CNN - 3/3 classes ✅**
-- **`GeophysicalCNN2D`** : Tests de création et forward pass
-- **`GeophysicalCNN3D`** : Tests de création et forward pass  
-- **`GeophysicalDataFrameNet`** : Tests de création et forward pass
+#### **3. `GeophysicalDataCleaner` - 23/23 méthodes ✅**
+- **Tests unitaires** : 23 tests complets répartis sur 12 fichiers
+- **Fonctionnalités testées** : Validation, nettoyage, transformation, normalisation, gestion des valeurs aberrantes
 
-#### **4. Tests d'Intégration - 5/5 tests ✅**
+#### **4. `GeophysicalDataAugmenter` - 31/31 méthodes ✅**
+- **Tests unitaires** : 31 tests complets répartis sur 5 fichiers
+- **Fonctionnalités testées** : Augmentation 2D/3D, DataFrames, techniques spécialisées
+
+#### **5. Modèles CNN - 20/20 classes ✅**
+- **Tests unitaires** : 20 tests complets
+- **Classes testées** : `GeophysicalCNN2D`, `GeophysicalCNN3D`, `GeophysicalDataFrameNet`, modèles hybrides, encodeurs d'images
+
+#### **6. Tests d'Intégration - 5/5 tests ✅**
 - **Pipeline complet** avec données réelles (PD.csv, S.csv)
 - **Validation end-to-end** du processus d'entraînement
 
@@ -75,21 +89,26 @@ python -m pytest --cov=src.model --cov-report=html test/unit/model/
 
 ```
 test/
-├── 📁 unit/                          # Tests unitaires
-│   ├── 📁 model/                     # Tests des modèles
+├── 📁 unit/                          # Tests unitaires (115+ tests)
+│   ├── 📁 model/                     # Tests des modèles (108 tests)
 │   │   ├── test_geophysical_trainer.py              # 18 tests
 │   │   ├── test_geophysical_trainer_evaluate_model.py # 15 tests
-│   │   ├── test_geophysical_trainer_save_model.py    # 12 tests
-│   │   ├── test_geophysical_trainer_load_model.py    # 15 tests
-│   │   ├── test_geophysical_trainer_plot_training_history.py # 8 tests
-│   │   └── test_geophysical_trainer_utility_methods.py # 18 tests
-│   ├── 📁 data/                      # Tests du processeur de données
+│   │   ├── test_geophysical_trainer_save_model.py    # 11 tests
+│   │   ├── test_geophysical_trainer_load_model.py    # 12 tests
+│   │   ├── test_geophysical_trainer_plot_training_history.py # 18 tests
+│   │   ├── test_geophysical_trainer_train_model.py   # 16 tests
+│   │   ├── test_geophysical_trainer_utility_methods.py # 18 tests
+│   │   ├── test_hybrid_net_utility_functions_real_data.py # 15 tests
+│   │   ├── test_hybrid_training_callback.py          # 17 tests
+│   │   └── test_image_encoder.py                     # 16 tests
+│   ├── 📁 data/                      # Tests du processeur de données (18 tests)
 │   │   └── test_geophysical_data_processor.py       # 18 tests
-│   ├── 📁 preprocessor/              # Tests du préprocesseur
-│   │   └── test_data_augmenter.py                   # Tests existants
+│   ├── 📁 preprocessor/              # Tests du préprocesseur (74 tests)
+│   │   ├── test_data_augmenter_*.py                 # 31 tests (5 fichiers)
+│   │   └── test_data_cleaner_*.py                   # 23 tests (12 fichiers)
 │   └── 📁 utils/                     # Tests des utilitaires
 │       └── test_logger.py                           # Tests existants
-├── 📁 integration/                   # Tests d'intégration
+├── 📁 integration/                   # Tests d'intégration (5 tests)
 │   └── test_geophysical_trainer_integration.py      # 5 tests
 └── 📁 __init__.py                    # Package Python
 ```
@@ -161,10 +180,11 @@ markers =
 - **Classes** : 100%
 
 ### **Performance des Tests :**
-- **Temps d'exécution total** : < 2 minutes
-- **Tests unitaires** : < 30 secondes
+- **Temps d'exécution total** : < 5 minutes
+- **Tests unitaires** : < 3 minutes
 - **Tests d'intégration** : < 1 minute
-- **Tests avec couverture** : < 2 minutes
+- **Tests avec couverture** : < 5 minutes
+- **Tests par module** : < 30 secondes chacun
 
 ### **Fiabilité :**
 - **Tests stables** : 100% (pas de tests flaky)

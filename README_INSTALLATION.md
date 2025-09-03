@@ -147,10 +147,10 @@ xdg-open htmlcov/index.html  # Linux
 ## 📊 Vérification de la Couverture
 
 ### **Statistiques Attendues**
-- **Tests unitaires** : 18 tests ✅
+- **Tests unitaires** : 115+ tests ✅
 - **Tests d'intégration** : 5 tests ✅
 - **Couverture totale** : 100% ✅
-- **Temps d'exécution** : < 2 minutes ✅
+- **Temps d'exécution** : < 5 minutes ✅
 
 ### **Commandes de Vérification**
 ```bash
@@ -170,6 +170,7 @@ python -m pytest --cov=src --cov-report=xml test/
 - **README principal** : `README.md`
 - **Guide des tests** : `README_TESTS.md`
 - **Guide d'entraînement** : `README_TRAINING.md`
+- **Guide de nettoyage** : `README_DATA_CLEANING.md`
 - **Guide d'augmentation** : `README_DATA_AUGMENTATION.md`
 
 ### **Structure du Projet**

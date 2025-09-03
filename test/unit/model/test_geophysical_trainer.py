@@ -139,9 +139,9 @@ class TestGeophysicalTrainer(unittest.TestCase):
         
         # Vérifier la forme des données DataFrame
         for batch_idx, (data, target) in enumerate(train_loader):
-            # Les données DataFrame ont la forme (batch_size, num_rows, num_features)
+            # Les données DataFrame ont la forme (batch_size, num_features)
             # où num_features = 4 (x, y, resistivity, chargeability)
-            self.assertEqual(data.shape[2], 4)  # 4 features (x, y, resistivity, chargeability)
+            self.assertEqual(data.shape[1], 4)  # 4 features (x, y, resistivity, chargeability)
             break
     
     def test_validation_errors(self):

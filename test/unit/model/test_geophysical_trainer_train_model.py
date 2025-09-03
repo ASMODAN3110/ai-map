@@ -140,16 +140,16 @@ class TestGeophysicalTrainerTrainModel(unittest.TestCase):
     def test_train_model_weight_decay(self):
         """Tester l'application du weight decay."""
         # Entraîner avec weight decay
-                history = self.trainer.train_model(
+        history = self.trainer.train_model(
             model=self.model,
-                    train_loader=self.train_loader,
-                    val_loader=self.val_loader,
-                    num_epochs=3,
-                    learning_rate=0.01,
+            train_loader=self.train_loader,
+            val_loader=self.val_loader,
+            num_epochs=3,
+            learning_rate=0.01,
             weight_decay=0.01
-                )
-                
-                # Vérifier que l'entraînement s'est bien déroulé
+        )
+        
+        # Vérifier que l'entraînement s'est bien déroulé
         self.assertGreater(len(history["epochs"]), 0)
         
         # Vérifier que les paramètres ont des gradients
@@ -169,7 +169,7 @@ class TestGeophysicalTrainerTrainModel(unittest.TestCase):
         constant_loader = torch.utils.data.DataLoader(constant_dataset, batch_size=2)
         
         # Entraîner avec early stopping
-                history = self.trainer.train_model(
+        history = self.trainer.train_model(
             model=simple_model,
             train_loader=constant_loader,
             val_loader=constant_loader,

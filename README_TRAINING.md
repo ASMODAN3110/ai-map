@@ -165,9 +165,10 @@ python -m pytest --cov=src --cov-report=html test/
 ```
 
 **Tests disponibles :**
-- **18 tests unitaires** pour toutes les méthodes
+- **108 tests unitaires** pour toutes les méthodes du trainer
 - **5 tests d'intégration** avec données réelles
 - **Validation complète** du pipeline d'entraînement
+- **Tests spécialisés** pour chaque fonctionnalité (évaluation, sauvegarde, chargement, etc.)
 
 ### Exemple Complet
 ```python

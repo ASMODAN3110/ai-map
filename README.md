@@ -195,9 +195,10 @@ python examples/hybrid_image_geophysics_example.py
 ## 🆕 Nouvelles Fonctionnalités
 
 ### **✅ Tests Unitaires Complets :**
-- **18 tests unitaires** pour toutes les classes principales
+- **115+ tests unitaires** pour toutes les classes principales
 - **5 tests d'intégration** avec données réelles (PD.csv, S.csv)
 - **Couverture 100%** de toutes les méthodes critiques
+- **Tests spécialisés** pour chaque fonctionnalité (nettoyage, augmentation, modèles)
 
 ### **🖼️ Traitement d'Images Géophysiques :**
 - **Processeur d'images** complet avec support multi-formats (JPG, PNG, TIFF, etc.)
@@ -232,6 +233,15 @@ python examples/hybrid_image_geophysics_example.py
 - **Sauvegarde/chargement** de modèles avec métadonnées
 - **Évaluation automatique** avec métriques géophysiques
 
+### **✅ Nettoyage de Données Géophysiques :**
+- **Validation automatique** des fichiers CSV et formats
+- **Nettoyage intelligent** des données multi-dispositifs
+- **Transformation des coordonnées** (LAT/LON → UTM)
+- **Suppression des valeurs aberrantes** avec méthodes statistiques
+- **Normalisation des valeurs** géophysiques (résistivité, chargeabilité)
+- **Gestion des valeurs manquantes** avec interpolation
+- **Validation de la couverture spatiale** des données
+
 ## 📈 Métriques de Performance
 
 - **Temps de traitement** : < 5 minutes
@@ -244,11 +254,13 @@ python examples/hybrid_image_geophysics_example.py
 **✅ COUVERTURE DE TESTS COMPLÈTE À 100% !**
 
 ### **📊 Couverture des Tests :**
-- **`GeophysicalTrainer`** : 100% (14/14 méthodes)
-- **`GeophysicalDataProcessor`** : 100% (8/8 méthodes)
-- **Modèles CNN** : 100% (3/3 classes)
+- **`GeophysicalTrainer`** : 100% (18 tests unitaires + 5 tests d'intégration)
+- **`GeophysicalDataProcessor`** : 100% (18 tests unitaires)
+- **`GeophysicalDataCleaner`** : 100% (23 tests unitaires)
+- **`GeophysicalDataAugmenter`** : 100% (31 tests unitaires)
+- **Modèles CNN** : 100% (20 tests unitaires)
 - **Tests d'intégration** : 100% (5/5 tests)
-- **Total** : **18 tests unitaires** + **5 tests d'intégration**
+- **Total** : **115+ tests unitaires** + **5 tests d'intégration**
 
 ### **🚀 Exécution des Tests :**
 
@@ -269,12 +281,24 @@ python -m pytest --cov=src --cov-report=html test/
 ### **📁 Structure des Tests :**
 ```
 test/
-├── 📁 unit/                  # Tests unitaires
-│   ├── 📁 model/            # Tests des modèles et trainer
-│   ├── 📁 data/             # Tests du processeur de données
-│   ├── 📁 preprocessor/     # Tests du préprocesseur
+├── 📁 unit/                  # Tests unitaires (115+ tests)
+│   ├── 📁 model/            # Tests des modèles et trainer (20 tests)
+│   │   ├── test_geophysical_trainer.py (18 tests)
+│   │   ├── test_geophysical_trainer_evaluate_model.py (15 tests)
+│   │   ├── test_geophysical_trainer_save_model.py (11 tests)
+│   │   ├── test_geophysical_trainer_load_model.py (12 tests)
+│   │   ├── test_geophysical_trainer_plot_training_history.py (18 tests)
+│   │   ├── test_geophysical_trainer_train_model.py (16 tests)
+│   │   ├── test_geophysical_trainer_utility_methods.py (18 tests)
+│   │   ├── test_hybrid_net_utility_functions_real_data.py (15 tests)
+│   │   ├── test_hybrid_training_callback.py (17 tests)
+│   │   └── test_image_encoder.py (16 tests)
+│   ├── 📁 data/             # Tests du processeur de données (18 tests)
+│   ├── 📁 preprocessor/     # Tests du préprocesseur (74 tests)
+│   │   ├── test_data_augmenter_*.py (31 tests)
+│   │   └── test_data_cleaner_*.py (23 tests)
 │   └── 📁 utils/            # Tests des utilitaires
-├── 📁 integration/           # Tests d'intégration
+├── 📁 integration/           # Tests d'intégration (5 tests)
 │   └── test_geophysical_trainer_integration.py
 └── 📁 __init__.py
 ```
@@ -285,6 +309,12 @@ test/
 - **Code source** : Docstrings et commentaires en français
 - **Notebooks** : Exemples d'utilisation et tutoriels
 - **Logs** : Système de logging coloré et configurable
+- **Guides spécialisés** :
+  - 📖 **Installation** : `README_INSTALLATION.md`
+  - 🧪 **Tests** : `README_TESTS.md`
+  - 🚀 **Entraînement** : `README_TRAINING.md`
+  - 🧹 **Nettoyage** : `README_DATA_CLEANING.md`
+  - 🔄 **Augmentation** : `README_DATA_AUGMENTATION.md`
 
 ## 🤝 Contribution
 

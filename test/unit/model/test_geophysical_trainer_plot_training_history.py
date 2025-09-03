@@ -14,6 +14,9 @@ from pathlib import Path
 import sys
 import os
 from unittest.mock import patch, MagicMock
+import matplotlib
+# Configuration matplotlib pour éviter les problèmes tkinter dans les tests
+matplotlib.use('Agg')  # Backend non-interactif
 import matplotlib.pyplot as plt
 
 # Ajouter le répertoire racine au path
@@ -99,12 +102,25 @@ class TestGeophysicalTrainerPlotTrainingHistory(unittest.TestCase):
             "val_accuracy": []
         }
         
-        # Tester que la méthode gère les listes vides
-        try:
-            self.trainer.plot_training_history()
-            self.assertTrue(True)
-        except Exception as e:
-            self.fail(f"La méthode plot_training_history a levé une exception avec un historique vide: {e}")
+        # Tester que la méthode gère les listes vides en utilisant des mocks
+        with patch('matplotlib.pyplot.subplots') as mock_subplots, \
+             patch('matplotlib.pyplot.tight_layout') as mock_tight_layout, \
+             patch('matplotlib.pyplot.show') as mock_show:
+            
+            mock_fig = MagicMock()
+            mock_ax1 = MagicMock()
+            mock_ax2 = MagicMock()
+            mock_ax3 = MagicMock()
+            mock_ax4 = MagicMock()
+            
+            mock_subplots.return_value = (mock_fig, ((mock_ax1, mock_ax2), (mock_ax3, mock_ax4)))
+            
+            # Tester que la méthode ne lève pas d'exception avec des listes vides
+            try:
+                self.trainer.plot_training_history()
+                self.assertTrue(True)
+            except Exception as e:
+                self.fail(f"La méthode plot_training_history a levé une exception avec un historique vide: {e}")
     
     def test_plot_training_history_single_epoch(self):
         """Tester le comportement avec une seule époque."""
@@ -327,7 +343,11 @@ class TestGeophysicalTrainerPlotTrainingHistory(unittest.TestCase):
         """Tester le logging lors de la sauvegarde."""
         save_path = os.path.join(self.temp_dir, "test_logging.png")
         
-        with patch('matplotlib.pyplot.subplots') as mock_subplots:
+        with patch('matplotlib.pyplot.subplots') as mock_subplots, \
+             patch('matplotlib.pyplot.tight_layout') as mock_tight_layout, \
+             patch('matplotlib.pyplot.show') as mock_show, \
+             patch('matplotlib.pyplot.savefig') as mock_savefig:
+            
             mock_fig = MagicMock()
             mock_ax1 = MagicMock()
             mock_ax2 = MagicMock()
@@ -338,6 +358,9 @@ class TestGeophysicalTrainerPlotTrainingHistory(unittest.TestCase):
             
             # Appeler la méthode avec sauvegarde
             self.trainer.plot_training_history(save_path=save_path)
+            
+            # Vérifier que savefig a été appelé avec le bon chemin
+            mock_savefig.assert_called_once_with(save_path, dpi=300, bbox_inches='tight')
             
             # Vérifier que le logging a été effectué (via le mock)
             # Note: Le vrai test vérifierait que logger.info a été appelé

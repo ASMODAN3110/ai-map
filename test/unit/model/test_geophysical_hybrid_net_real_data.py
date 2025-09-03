@@ -406,7 +406,7 @@ class TestGeophysicalHybridNetForwardPass(TestGeophysicalHybridNetRealData):
         self.assertTrue(torch.allclose(output1, output2, atol=1e-6))
         
         logger.info("✅ Cohérence forward pass avec données réelles: OK")
-
+    
 
 class TestGeophysicalHybridNetFeatureExtraction(TestGeophysicalHybridNetRealData):
     """Tests d'extraction de features de GeophysicalHybridNet avec données réelles."""
@@ -463,7 +463,7 @@ class TestGeophysicalHybridNetFeatureExtraction(TestGeophysicalHybridNetRealData
         
         # Extraire les features
         features = model.get_feature_maps(images, geo_data)
-        
+            
         # Calculer une loss simple
         loss = features['output'].sum()
         
@@ -646,11 +646,11 @@ class TestGeophysicalHybridNetIntegration(TestGeophysicalHybridNetRealData):
             output = model(images, geo_data)
             self.assertEqual(output.shape, (batch_size, self.num_classes))
             self.assertTrue(torch.isfinite(output).all())
-            
+        
             # Test de l'extraction de features
-            features = model.get_feature_maps(images, geo_data)
-            self.assertIn('output', features)
-            self.assertEqual(features['output'].shape, (batch_size, self.num_classes))
+        features = model.get_feature_maps(images, geo_data)
+        self.assertIn('output', features)
+        self.assertEqual(features['output'].shape, (batch_size, self.num_classes))
         
         logger.info("✅ Intégration scénarios géophysiques réels: OK")
 
