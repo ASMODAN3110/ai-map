@@ -54,12 +54,8 @@ class GeophysicalDataAugmenter:
         Returns:
             Liste des grilles augmentées
         """
-        # Gérer les formats 3D et 4D
-        if len(grid.shape) == 4:
-            # Format 4D (samples, channels, height, width) - prendre le premier échantillon
-            grid = grid[0]  # Prendre le premier échantillon
-        elif len(grid.shape) != 3:
-            raise ValueError("grid doit être un tableau numpy 3D (height, width, channels) ou 4D (samples, channels, height, width)")
+        if not isinstance(grid, np.ndarray) or grid.ndim != 3:
+            raise ValueError("grid doit être un tableau numpy 3D (height, width, channels)")
         
         augmented_grids = []
         

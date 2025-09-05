@@ -18,39 +18,27 @@ class GeophysicalDataProcessor:
         self.device_data = {}
         
     def load_and_validate(self) -> Dict[str, pd.DataFrame]:
-        """Charger et valider les données de tous les dispositifs."""
+        """Charger et valider les données nettoyées de tous les dispositifs."""
         logger.info("Chargement et validation des données géophysiques...")
         
-        # D'abord essayer les fichiers nettoyés
         processed_dir = Path(CONFIG.paths.processed_data_dir)
+        
+        # Chercher tous les fichiers nettoyés
         clean_files = list(processed_dir.glob("*_cleaned.csv"))
         
-        if clean_files:
-            for clean_file in clean_files:
-                device_name = clean_file.stem.replace("_cleaned", "")
-                try:
-                    df = pd.read_csv(clean_file)
-                    logger.info(f"Chargé {len(df)} enregistrements pour {device_name}")
-                    self.device_data[device_name] = df
-                except Exception as e:
-                    logger.warning(f"Erreur lors du chargement de {clean_file}: {e}")
-        else:
-            # Si pas de fichiers nettoyés, utiliser les fichiers bruts
-            logger.info("Aucun fichier nettoyé trouvé, utilisation des fichiers bruts...")
-            raw_dir = Path(CONFIG.paths.raw_data_dir) / "csv" / "profiles"
+        if not clean_files:
+            logger.warning("Aucun fichier nettoyé trouvé")
+            return {}
+        
+        for clean_file in clean_files:
+            device_name = clean_file.stem.replace("_cleaned", "")
             
-            if raw_dir.exists():
-                for csv_file in raw_dir.glob("*.csv"):
-                    device_name = csv_file.stem
-                    try:
-                        # Lire avec le bon séparateur
-                        df = pd.read_csv(csv_file, sep=';')
-                        logger.info(f"Chargé {len(df)} enregistrements pour {device_name}")
-                        self.device_data[device_name] = df
-                    except Exception as e:
-                        logger.warning(f"Erreur lors du chargement de {csv_file}: {e}")
-            else:
-                logger.warning("Aucun fichier de données trouvé")
+            try:
+                df = pd.read_csv(clean_file)
+                logger.info(f"Chargé {len(df)} enregistrements pour {device_name}")
+                self.device_data[device_name] = df
+            except Exception as e:
+                logger.warning(f"Erreur lors du chargement de {clean_file}: {e}")
                 
         return self.device_data
     
@@ -68,28 +56,9 @@ class GeophysicalDataProcessor:
         """Créer une grille 2D pour les données du dispositif."""
         grid_shape = CONFIG.processing.grid_2d
         
-        # Vérifier si les colonnes nécessaires existent
-        required_cols = ['x', 'y', 'z']
-        missing_cols = [col for col in required_cols if col not in df.columns]
-        
-        if missing_cols:
-            logger.warning(f"Colonnes manquantes pour {device_name}: {missing_cols}")
-            # Créer des données factices si les colonnes manquent
-            x_min, x_max = 0, 100
-            y_min, y_max = 0, 100
-        else:
-            # Obtenir les limites spatiales
-            x_min, x_max = df['x'].min(), df['x'].max()
-            y_min, y_max = df['y'].min(), df['y'].max()
-            
-            # Normaliser les coordonnées si elles sont trop grandes
-            if x_max - x_min > 1000 or y_max - y_min > 1000:
-                logger.info(f"Normalisation des coordonnées pour {device_name}")
-                df = df.copy()
-                df['x'] = (df['x'] - x_min) / (x_max - x_min) * 100
-                df['y'] = (df['y'] - y_min) / (y_max - y_min) * 100
-                x_min, x_max = 0, 100
-                y_min, y_max = 0, 100
+        # Obtenir les limites spatiales
+        x_min, x_max = df['x'].min(), df['x'].max()
+        y_min, y_max = df['y'].min(), df['y'].max()
         
         # Créer les coordonnées de la grille
         x_grid = np.linspace(x_min, x_max, grid_shape[0])
@@ -101,31 +70,24 @@ class GeophysicalDataProcessor:
         # Interpolation simple - remplir avec le plus proche voisin
         for i, x in enumerate(x_grid):
             for j, y in enumerate(y_grid):
-                if missing_cols:
-                    # Si les colonnes manquent, utiliser des valeurs aléatoires
-                    grid[i, j, 0] = np.random.uniform(1e-8, 1e9)
-                    grid[i, j, 1] = np.random.uniform(0, 200)
-                    grid[i, j, 2] = np.random.uniform(-100, 100)
-                    grid[i, j, 3] = np.random.uniform(0, 100)
-                else:
-                    # Trouver le point de données le plus proche
-                    distances = np.sqrt((df['x'] - x)**2 + (df['y'] - y)**2)
-                    nearest_idx = np.argmin(distances)
+                # Trouver le point de données le plus proche
+                distances = np.sqrt((df['x'] - x)**2 + (df['y'] - y)**2)
+                nearest_idx = np.argmin(distances)
+                
+                # Remplir la grille avec les mesures
+                # Mapper les colonnes réelles aux indices de la grille
+                if 'Rho(ohm.m)' in df.columns:
+                    grid[i, j, 0] = df.iloc[nearest_idx]['Rho(ohm.m)']
+                elif 'resistivity' in df.columns:
+                    grid[i, j, 0] = df.iloc[nearest_idx]['resistivity']
                     
-                    # Remplir la grille avec les mesures
-                    # Mapper les colonnes réelles aux indices de la grille
-                    if 'Rho(ohm.m)' in df.columns:
-                        grid[i, j, 0] = df.iloc[nearest_idx]['Rho(ohm.m)']
-                    elif 'resistivity' in df.columns:
-                        grid[i, j, 0] = df.iloc[nearest_idx]['resistivity']
-                        
-                    if 'M (mV/V)' in df.columns:
-                        grid[i, j, 1] = df.iloc[nearest_idx]['M (mV/V)']
-                    elif 'chargeability' in df.columns:
-                        grid[i, j, 1] = df.iloc[nearest_idx]['chargeability']
-                        
-                    grid[i, j, 2] = df.iloc[nearest_idx]['x']
-                    grid[i, j, 3] = df.iloc[nearest_idx]['y']
+                if 'M (mV/V)' in df.columns:
+                    grid[i, j, 1] = df.iloc[nearest_idx]['M (mV/V)']
+                elif 'chargeability' in df.columns:
+                    grid[i, j, 1] = df.iloc[nearest_idx]['chargeability']
+                    
+                grid[i, j, 2] = df.iloc[nearest_idx]['x']
+                grid[i, j, 3] = df.iloc[nearest_idx]['y']
         
         logger.debug(f"Grille {grid_shape} créée pour {device_name}")
         return grid
@@ -174,14 +136,9 @@ class GeophysicalDataProcessor:
             # Utiliser le premier dispositif comme base et l'étendre en 3D
             base_2d = multi_device_tensor[0]  # (height, width, channels)
             
-            # Redimensionner la grille 2D pour correspondre au volume 3D
-            from scipy.ndimage import zoom
-            zoom_factors = (grid_3d[1]/base_2d.shape[0], grid_3d[2]/base_2d.shape[1], 1)
-            base_2d_resized = zoom(base_2d, zoom_factors, order=1)
-            
             # Dupliquer à travers la profondeur
             for d in range(grid_3d[0]):
-                volume[d] = base_2d_resized
+                volume[d] = base_2d
         
         logger.info(f"Volume 3D créé: {volume.shape}")
         return volume

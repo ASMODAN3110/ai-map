@@ -419,10 +419,8 @@ class GeophysicalTrainer:
                 augmented_grids.extend(augmented)
                 augmented_labels.extend([label] * len(augmented))
         
-        # Convertir en tenseurs PyTorch et transposer pour PyTorch (channels first)
+        # Convertir en tenseurs PyTorch
         X = torch.FloatTensor(np.array(augmented_grids))
-        # Transposer de (batch, height, width, channels) vers (batch, channels, height, width)
-        X = X.permute(0, 3, 1, 2)
         y = torch.LongTensor(augmented_labels)
         
         # Split train/validation
