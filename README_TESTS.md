@@ -34,6 +34,7 @@ Ce guide documente la suite de tests complète du projet AI-Map, incluant les te
 #### **5. Modèles CNN - 20/20 classes ✅**
 - **Tests unitaires** : 20 tests complets
 - **Classes testées** : `GeophysicalCNN2D`, `GeophysicalCNN3D`, `GeophysicalDataFrameNet`, modèles hybrides, encodeurs d'images
+- **Modèles opérationnels** : CNN 2D (cnn_2d_model.pth), CNN 3D (cnn_3d_model.pth), Modèle Hybride (hybrid_model.pth)
 
 #### **6. Tests d'Intégration - 5/5 tests ✅**
 - **Pipeline complet** avec données réelles (PD.csv, S.csv)
@@ -83,6 +84,19 @@ python -m pytest --cov=src --cov-report=html test/
 
 # Couverture d'un module spécifique
 python -m pytest --cov=src.model --cov-report=html test/unit/model/
+```
+
+#### **Tests des Modèles Sauvegardés :**
+```bash
+# Tester l'exécution des modèles
+python run_cnn_2d_model.py
+python run_cnn_3d_model.py
+python run_hybrid_model.py
+
+# Tester avec données réelles
+python run_cnn_2d_model.py --real-data
+python run_cnn_3d_model.py --real-data
+python run_hybrid_model.py --real-data
 ```
 
 ## 📁 Structure des Tests

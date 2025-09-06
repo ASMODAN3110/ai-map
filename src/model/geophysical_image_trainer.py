@@ -504,10 +504,10 @@ class GeophysicalImageTrainer(GeophysicalTrainer):
                     val_correct += (predicted == labels).sum().item()
             
             # Calculer les métriques moyennes
-            train_loss_avg = train_loss / len(train_loader)
-            val_loss_avg = val_loss / len(val_loader)
-            train_acc = 100 * train_correct / train_total
-            val_acc = 100 * val_correct / val_total
+            train_loss_avg = train_loss / len(train_loader) if len(train_loader) > 0 else 0
+            val_loss_avg = val_loss / len(val_loader) if len(val_loader) > 0 else 0
+            train_acc = 100 * train_correct / train_total if train_total > 0 else 0
+            val_acc = 100 * val_correct / val_total if val_total > 0 else 0
             
             # Mettre à jour le scheduler
             scheduler.step(val_loss_avg)

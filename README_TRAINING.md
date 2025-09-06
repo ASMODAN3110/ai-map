@@ -1,28 +1,43 @@
 # Module d'Entraînement Géophysique
 
-Ce module fournit des fonctionnalités complètes d'entraînement pour les modèles de deep learning spécialisés dans l'analyse de données géophysiques, avec intégration automatique de l'augmentation de données.
+Ce module fournit des fonctionnalités complètes d'entraînement pour les modèles de deep learning spécialisés dans l'analyse de données géophysiques, avec intégration automatique de l'augmentation de données et support des modèles hybrides.
+
+## 🎯 Modèles Disponibles
+
+### **✅ Modèles Opérationnels**
+- **CNN 2D** : `cnn_2d_model.pth` - Modèle géophysique 2D
+- **CNN 3D** : `cnn_3d_model.pth` - Modèle géophysique 3D  
+- **Modèle Hybride** : `hybrid_model.pth` - Images + Données géophysiques
+
+### **🚀 Scripts d'Exécution**
+- **run_cnn_2d_model.py** : Exécution du modèle CNN 2D
+- **run_cnn_3d_model.py** : Exécution du modèle CNN 3D
+- **run_hybrid_model.py** : Exécution du modèle hybride
 
 ## 🏗️ Architecture
 
 ### Classes Principales
 
-#### 1. **GeophysicalCNN2D**
+#### 1. **GeophysicalCNN2D** (cnn_2d_model.pth)
 - **Réseau convolutif 2D** optimisé pour les grilles géophysiques
 - **Architecture** : 4 couches de convolution + couches fully connected
-- **Entrée** : Grilles 2D (résistivité, chargeabilité, coordonnées x, y)
-- **Sortie** : Classification multi-classes
+- **Entrée** : Grilles 2D (4, 64, 64) - 4 canaux pour les dispositifs
+- **Sortie** : Classification binaire (2 classes)
+- **Paramètres** : ~2M paramètres entraînables
 
-#### 2. **GeophysicalCNN3D**
+#### 2. **GeophysicalCNN3D** (cnn_3d_model.pth)
 - **Réseau convolutif 3D** pour les volumes géophysiques
 - **Architecture** : 3 couches de convolution 3D + couches fully connected
-- **Entrée** : Volumes 3D (profondeur, hauteur, largeur)
-- **Sortie** : Classification multi-classes
+- **Entrée** : Volumes 3D (4, 32, 32, 32) - 4 canaux multi-dispositifs
+- **Sortie** : Classification binaire (2 classes)
+- **Paramètres** : ~1.5M paramètres entraînables
 
-#### 3. **GeophysicalDataFrameNet**
-- **Réseau de neurones** pour données tabulaires géophysiques
-- **Architecture** : Couches fully connected avec BatchNorm et Dropout
-- **Entrée** : Features numériques extraites des DataFrames
-- **Sortie** : Classification multi-classes
+#### 3. **GeophysicalHybridNet** (hybrid_model.pth)
+- **Modèle hybride** combinant images et données géophysiques
+- **Architecture** : ResNet18 + Encodeur géophysique + Module de fusion
+- **Entrée** : Images (3, 64, 64) + Données géophysiques (4,)
+- **Sortie** : Classification binaire (2 classes)
+- **Paramètres** : ~12M paramètres entraînables
 
 #### 4. **GeophysicalTrainer**
 - **Entraîneur spécialisé** intégrant l'augmenteur de données
@@ -30,6 +45,58 @@ Ce module fournit des fonctionnalités complètes d'entraînement pour les modè
 - **Support multi-device** : CPU/GPU automatique
 
 ## 🚀 Fonctionnalités
+
+### **🎯 Exécution des Modèles Sauvegardés**
+
+#### **CNN 2D**
+```bash
+# Exécution simple
+python run_cnn_2d_model.py
+
+# Avec données réelles
+python run_cnn_2d_model.py --real-data
+
+# Mode verbose
+python run_cnn_2d_model.py --verbose
+```
+
+#### **CNN 3D**
+```bash
+# Exécution simple
+python run_cnn_3d_model.py
+
+# Avec données réelles
+python run_cnn_3d_model.py --real-data
+
+# Mode verbose
+python run_cnn_3d_model.py --verbose
+```
+
+#### **Modèle Hybride**
+```bash
+# Exécution simple
+python run_hybrid_model.py
+
+# Avec données réelles
+python run_hybrid_model.py --real-data
+
+# Mode verbose
+python run_hybrid_model.py --verbose
+```
+
+### **🚀 Entraînement de Nouveaux Modèles**
+
+#### **Via Pipeline Principal**
+```bash
+# CNN 2D
+python main.py --model cnn_2d --epochs 50 --batch-size 16
+
+# CNN 3D
+python main.py --model cnn_3d --epochs 80 --batch-size 16
+
+# Modèle Hybride
+python main.py --model hybrid --epochs 60 --learning-rate 0.0005
+```
 
 ### Préparation des Données avec Augmentation
 

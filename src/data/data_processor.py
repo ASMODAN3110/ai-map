@@ -37,14 +37,14 @@ class GeophysicalDataProcessor:
         else:
             # Si pas de fichiers nettoyés, utiliser les fichiers bruts
             logger.info("Aucun fichier nettoyé trouvé, utilisation des fichiers bruts...")
-            raw_dir = Path(CONFIG.paths.raw_data_dir) / "csv" / "profiles"
+            raw_dir = Path(CONFIG.paths.raw_data_dir)
             
             if raw_dir.exists():
                 for csv_file in raw_dir.glob("*.csv"):
                     device_name = csv_file.stem
                     try:
                         # Lire avec le bon séparateur
-                        df = pd.read_csv(csv_file, sep=';')
+                        df = pd.read_csv(csv_file, sep=',')
                         logger.info(f"Chargé {len(df)} enregistrements pour {device_name}")
                         self.device_data[device_name] = df
                     except Exception as e:
@@ -73,10 +73,21 @@ class GeophysicalDataProcessor:
         missing_cols = [col for col in required_cols if col not in df.columns]
         
         if missing_cols:
-            logger.warning(f"Colonnes manquantes pour {device_name}: {missing_cols}")
-            # Créer des données factices si les colonnes manquent
-            x_min, x_max = 0, 100
-            y_min, y_max = 0, 100
+            # Essayer d'utiliser les colonnes de coordonnées alternatives
+            if 'LAT' in df.columns and 'LON' in df.columns:
+                logger.info(f"Utilisation des coordonnées LAT/LON pour {device_name}")
+                # Convertir LAT/LON en coordonnées cartésiennes approximatives
+                df = df.copy()
+                df['x'] = df['LON'] * 111320 * np.cos(np.radians(df['LAT'].mean()))  # Approximation
+                df['y'] = df['LAT'] * 110540  # Approximation
+                df['z'] = 0  # Profondeur par défaut
+                x_min, x_max = df['x'].min(), df['x'].max()
+                y_min, y_max = df['y'].min(), df['y'].max()
+            else:
+                logger.warning(f"Colonnes manquantes pour {device_name}: {missing_cols}")
+                # Créer des données factices si les colonnes manquent
+                x_min, x_max = 0, 100
+                y_min, y_max = 0, 100
         else:
             # Obtenir les limites spatiales
             x_min, x_max = df['x'].min(), df['x'].max()
@@ -164,8 +175,8 @@ class GeophysicalDataProcessor:
         grid_3d = CONFIG.processing.grid_3d
         channels = 4
         
-        # Créer un volume 3D
-        volume = np.zeros((grid_3d[0], grid_3d[1], grid_3d[2], channels))
+        # Créer un volume 3D avec les canaux en premier (format PyTorch)
+        volume = np.zeros((channels, grid_3d[0], grid_3d[1], grid_3d[2]))
         
         # Obtenir le tenseur 2D et l'étendre en 3D
         multi_device_tensor = self.create_multi_device_tensor()
@@ -179,9 +190,10 @@ class GeophysicalDataProcessor:
             zoom_factors = (grid_3d[1]/base_2d.shape[0], grid_3d[2]/base_2d.shape[1], 1)
             base_2d_resized = zoom(base_2d, zoom_factors, order=1)
             
-            # Dupliquer à travers la profondeur
-            for d in range(grid_3d[0]):
-                volume[d] = base_2d_resized
+            # Dupliquer à travers la profondeur pour chaque canal
+            for c in range(channels):
+                for d in range(grid_3d[0]):
+                    volume[c, d] = base_2d_resized[:, :, c]
         
         logger.info(f"Volume 3D créé: {volume.shape}")
         return volume

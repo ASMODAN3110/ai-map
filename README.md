@@ -46,17 +46,28 @@ ai-map/
 | **Schlumberger 6** | `PRO 6 COMPLET.csv` | 469 | 945m × 94m | Résolution verticale élevée |
 | **Schlumberger 7** | `PRO 7 COMPLET.csv` | ~100 | 180m × 31m | Profil court |
 
-## 🧠 Modèles CNN
+## 🧠 Modèles CNN Disponibles
 
-### U-Net 2D
-- **Entrée** : Tenseur (64×64×4) - 4 canaux pour les dispositifs
-- **Sortie** : 2 canaux (résistivité vraie, chargeabilité vraie)
-- **Paramètres** : ~31M paramètres entraînables
+### CNN 2D (cnn_2d_model.pth)
+- **Entrée** : Tenseur (4, 64, 64) - 4 canaux pour les dispositifs
+- **Sortie** : 2 classes (classification binaire)
+- **Architecture** : CNN géophysique 2D
+- **Paramètres** : ~2M paramètres entraînables
+- **Utilisation** : `python run_cnn_2d_model.py`
 
-### VoxNet 3D
-- **Entrée** : Tenseur (32×32×32×4) - Volume 3D multi-canaux
-- **Sortie** : Volume 3D de chargeabilité
-- **Paramètres** : ~15M paramètres entraînables
+### CNN 3D (cnn_3d_model.pth)
+- **Entrée** : Tenseur (4, 32, 32, 32) - Volume 3D multi-canaux
+- **Sortie** : 2 classes (classification binaire)
+- **Architecture** : CNN géophysique 3D
+- **Paramètres** : ~1.5M paramètres entraînables
+- **Utilisation** : `python run_cnn_3d_model.py`
+
+### Modèle Hybride (hybrid_model.pth)
+- **Entrée** : Images (3, 64, 64) + Données géophysiques (4,)
+- **Sortie** : 2 classes (classification binaire)
+- **Architecture** : ResNet18 + Encodeur géophysique + Fusion
+- **Paramètres** : ~12M paramètres entraînables
+- **Utilisation** : `python run_hybrid_model.py`
 
 ## 🚀 Installation et Utilisation
 
@@ -94,12 +105,38 @@ pip install -r requirements-dev.txt
 
 ### Utilisation
 
+#### **🚀 Pipeline Principal**
 ```bash
-# Lancer le pipeline principal
+# Lancer le pipeline complet
 python main.py
 
-# Ou lancer depuis un notebook
-jupyter notebook notebooks/phase1/01_data_exploration.ipynb
+# Entraîner un modèle spécifique
+python main.py --model cnn_2d --epochs 50 --batch-size 16
+python main.py --model cnn_3d --epochs 80 --batch-size 16
+python main.py --model hybrid --epochs 60 --learning-rate 0.0005
+```
+
+#### **🎯 Exécution des Modèles Sauvegardés**
+```bash
+# Exécuter le modèle CNN 2D
+python run_cnn_2d_model.py
+python run_cnn_2d_model.py --real-data
+
+# Exécuter le modèle CNN 3D
+python run_cnn_3d_model.py
+python run_cnn_3d_model.py --real-data
+
+# Exécuter le modèle hybride
+python run_hybrid_model.py
+python run_hybrid_model.py --real-data --verbose
+```
+
+#### **📊 Exemples et Démonstrations**
+```bash
+# Exemples d'utilisation
+python examples/training_example.py
+python examples/hybrid_image_geophysics_example.py
+python examples/advanced_augmentation_demo.py
 ```
 
 ### **🖼️ Utilisation avec Images Géophysiques**
@@ -164,19 +201,26 @@ python examples/hybrid_image_geophysics_example.py
 
 ## 📊 Pipeline de Traitement
 
-### Phase 1: Prétraitement (✅ Implémentée)
+### Phase 1: Prétraitement (✅ Terminée)
 1. **Nettoyage des données** : Validation, suppression des valeurs manquantes
 2. **Transformation des coordonnées** : LAT/LON → UTM
 3. **Normalisation** : Résistivité (log), chargeabilité (min-max)
 4. **Création des grilles spatiales** : 2D (64×64) et 3D (32×32×32)
-5. **Augmentation des données** : Techniques géométriques, bruit, variations (✅ Nouveau!)
+5. **Augmentation des données** : Techniques géométriques, bruit, variations
 
-### Phase 2: Modèles CNN (🔄 En cours)
-1. **Implémentation U-Net 2D**
-2. **Implémentation VoxNet 3D**
-3. **Pipeline d'entraînement**
+### Phase 2: Modèles CNN (✅ Terminée)
+1. **CNN 2D** : Modèle géophysique 2D (cnn_2d_model.pth)
+2. **CNN 3D** : Modèle géophysique 3D (cnn_3d_model.pth)
+3. **Modèle Hybride** : Images + Données géophysiques (hybrid_model.pth)
+4. **Pipeline d'entraînement** : Complet avec métriques et sauvegarde
 
-### Phase 3: Application Web (📋 Planifiée)
+### Phase 3: Scripts d'Exécution (✅ Terminée)
+1. **run_cnn_2d_model.py** : Exécution du modèle CNN 2D
+2. **run_cnn_3d_model.py** : Exécution du modèle CNN 3D
+3. **run_hybrid_model.py** : Exécution du modèle hybride
+4. **Guides d'utilisation** : Documentation complète
+
+### Phase 4: Application Web (📋 Planifiée)
 1. **Backend Flask** : API REST
 2. **Frontend React** : Interface utilisateur
 3. **Base de données** : PostgreSQL + PostGIS
@@ -192,7 +236,13 @@ python examples/hybrid_image_geophysics_example.py
 - **Flask** : Backend web (futur)
 - **React** : Frontend web (futur)
 
-## 🆕 Nouvelles Fonctionnalités
+## 🆕 Fonctionnalités Principales
+
+### **✅ Modèles CNN Opérationnels :**
+- **CNN 2D** : Modèle géophysique 2D avec 2M paramètres
+- **CNN 3D** : Modèle géophysique 3D avec 1.5M paramètres  
+- **Modèle Hybride** : Images + Données géophysiques avec 12M paramètres
+- **Scripts d'exécution** : Prêts à l'utilisation avec données factices et réelles
 
 ### **✅ Tests Unitaires Complets :**
 - **115+ tests unitaires** pour toutes les classes principales
@@ -315,6 +365,8 @@ test/
   - 🚀 **Entraînement** : `README_TRAINING.md`
   - 🧹 **Nettoyage** : `README_DATA_CLEANING.md`
   - 🔄 **Augmentation** : `README_DATA_AUGMENTATION.md`
+  - 🎯 **CNN 2D** : `GUIDE_UTILISATION_MODEL_CNN2D.md`
+  - 🎯 **Modèle Hybride** : `GUIDE_UTILISATION_MODEL_HYBRID.md`
 
 ## 🤝 Contribution
 

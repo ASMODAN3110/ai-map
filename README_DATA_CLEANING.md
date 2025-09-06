@@ -2,6 +2,13 @@
 
 **Module de nettoyage et validation automatique des données géophysiques multi-dispositifs**
 
+## 🎯 Intégration avec les Modèles
+
+Ce module de nettoyage est intégré dans le pipeline principal et alimente directement les modèles CNN :
+- **CNN 2D** : Données nettoyées → Grilles 2D (4, 64, 64)
+- **CNN 3D** : Données nettoyées → Volumes 3D (4, 32, 32, 32)
+- **Modèle Hybride** : Données nettoyées + Images → Classification
+
 ## 📋 Vue d'Ensemble
 
 Le module `GeophysicalDataCleaner` fournit des fonctionnalités complètes de nettoyage, validation et préparation des données géophysiques pour l'entraînement des modèles de deep learning.

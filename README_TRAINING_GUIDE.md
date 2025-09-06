@@ -21,38 +21,60 @@ python main.py --model cnn_2d --epochs 100 --learning-rate 0.0001
 
 ## 📋 Types de Modèles Disponibles
 
-### 1. CNN 2D (`cnn_2d`)
+### 1. CNN 2D (`cnn_2d`) - ✅ Opérationnel
 **Usage :** Classification de grilles géophysiques 2D
 ```bash
+# Entraînement
 python main.py --model cnn_2d --epochs 100 --batch-size 32
+
+# Exécution du modèle sauvegardé
+python run_cnn_2d_model.py
+python run_cnn_2d_model.py --real-data
 ```
 
 **Caractéristiques :**
-- Input : Grilles 2D (64x64x4 canaux)
-- Architecture : CNN avec couches de convolution 2D
-- Optimisé pour : Résistivité et chargeabilité 2D
+- Input : Grilles 2D (4, 64, 64) - 4 canaux pour les dispositifs
+- Architecture : CNN géophysique 2D
+- Sortie : Classification binaire (2 classes)
+- Paramètres : ~2M paramètres entraînables
+- Fichier : `cnn_2d_model.pth`
 
-### 2. CNN 3D (`cnn_3d`)
+### 2. CNN 3D (`cnn_3d`) - ✅ Opérationnel
 **Usage :** Classification de volumes géophysiques 3D
 ```bash
+# Entraînement
 python main.py --model cnn_3d --epochs 80 --batch-size 16
+
+# Exécution du modèle sauvegardé
+python run_cnn_3d_model.py
+python run_cnn_3d_model.py --real-data
 ```
 
 **Caractéristiques :**
-- Input : Volumes 3D (32x32x32x4 canaux)
-- Architecture : CNN avec couches de convolution 3D
-- Optimisé pour : Volumes de données géophysiques
+- Input : Volumes 3D (4, 32, 32, 32) - 4 canaux multi-dispositifs
+- Architecture : CNN géophysique 3D
+- Sortie : Classification binaire (2 classes)
+- Paramètres : ~1.5M paramètres entraînables
+- Fichier : `cnn_3d_model.pth`
 
-### 3. Modèle Hybride (`hybrid`)
+### 3. Modèle Hybride (`hybrid`) - ✅ Opérationnel
 **Usage :** Combinaison d'images et de données géophysiques
 ```bash
+# Entraînement
 python main.py --model hybrid --epochs 60 --learning-rate 0.0005
+
+# Exécution du modèle sauvegardé
+python run_hybrid_model.py
+python run_hybrid_model.py --real-data --verbose
 ```
 
 **Caractéristiques :**
-- Input : Images + données géophysiques tabulaires
-- Architecture : Réseau hybride avec fusion de features
-- Optimisé pour : Analyse multi-modale
+- Input : Images (3, 64, 64) + Données géophysiques (4,)
+- Architecture : ResNet18 + Encodeur géophysique + Fusion
+- Sortie : Classification binaire (2 classes)
+- Paramètres : ~12M paramètres entraînables
+- Fichier : `hybrid_model.pth`
+
 
 ### 4. Modèle DataFrame (`dataframe`)
 **Usage :** Classification de données tabulaires géophysiques

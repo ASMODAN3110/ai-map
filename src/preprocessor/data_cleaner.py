@@ -45,12 +45,12 @@ class GeophysicalDataCleaner:
         Returns:
             Dict associant les noms des dispositifs aux tuples (clean_path, report)
         """
-        # Chercher les fichiers de profils
-        profiles_dir = self.raw_data_dir / "csv" / "profiles"
+        # Chercher les fichiers de profils corrigés
+        profiles_dir = self.raw_data_dir
         results = {}
         
         if not profiles_dir.exists():
-            logger.warning(f"Répertoire des profils non trouvé: {profiles_dir}")
+            logger.warning(f"Répertoire des profils corrigés non trouvé: {profiles_dir}")
             # Créer des données factices
             return self._create_dummy_data()
         
@@ -61,10 +61,10 @@ class GeophysicalDataCleaner:
             logger.warning("Aucun fichier de profil trouvé")
             return self._create_dummy_data()
         
-        logger.info(f"Trouvé {len(profile_files)} fichiers de profils")
+        logger.info(f"Trouvé {len(profile_files)} fichiers de profils corrigés")
         
-        # Traiter chaque fichier de profil
-        for i, profile_file in enumerate(profile_files[:5]):  # Limiter à 5 profils
+        # Traiter chaque fichier de profil (tous les profils, pas seulement 5)
+        for i, profile_file in enumerate(profile_files):
             device_name = f"profil_{i+1}"
             logger.info(f"Nettoyage des données pour le profil: {device_name}")
             
@@ -85,30 +85,47 @@ class GeophysicalDataCleaner:
         """Nettoyer les données d'un profil spécifique."""
         try:
             # Lire le fichier CSV avec le bon séparateur
-            df = pd.read_csv(profile_file, sep=';')
+            # Essayer d'abord avec virgule, puis point-virgule
+            try:
+                df = pd.read_csv(profile_file, sep=',')
+            except:
+                df = pd.read_csv(profile_file, sep=';')
             
-            # Vérifier les colonnes requises
-            required_columns = ['x', 'y', 'z', 'Rho(ohm.m)', 'M (mV/V)']
-            missing_columns = [col for col in required_columns if col not in df.columns]
+            # Appliquer le mapping des colonnes d'abord
+            column_mapping = {
+                'Rho(ohm.m)': 'resistivity',
+                'M (mV/V)': 'chargeability',
+                'SP (mV)': 'spontaneous_potential',
+                'xA (m)': 'xA',
+                'xB (m)': 'xB',
+                'xM (m)': 'xM',
+                'xN (m)': 'xN',
+                'Dev. M': 'dev_m',
+                'Dev. M (mV/V)': 'dev_m',
+                'VMN (mV)': 'vmn',
+                'IAB (mA)': 'iab'
+            }
+            
+            # Renommer les colonnes
+            df_clean = df.rename(columns=column_mapping)
+            
+            # Vérifier les colonnes requises après mapping
+            required_columns = ['x', 'y', 'z', 'resistivity', 'chargeability']
+            missing_columns = [col for col in required_columns if col not in df_clean.columns]
             
             if missing_columns:
-                raise ValueError(f"Colonnes manquantes: {missing_columns}")
-            
-            # Nettoyer les données
-            df_clean = df.copy()
-            
+                logger.warning(f"Colonnes manquantes après mapping: {missing_columns}")
+                logger.warning(f"Colonnes disponibles: {list(df_clean.columns)}")
+                # Continuer avec les colonnes disponibles
+                available_required = [col for col in required_columns if col in df_clean.columns]
+                if len(available_required) < 2:
+                    raise ValueError(f"Pas assez de colonnes requises disponibles. Disponibles: {list(df_clean.columns)}")
             # Supprimer les lignes avec des valeurs manquantes
-            df_clean = df_clean.dropna(subset=required_columns)
+            df_clean = df_clean.dropna(subset=['x', 'y', 'z', 'resistivity', 'chargeability'])
             
             # Supprimer les valeurs aberrantes (optionnel)
-            df_clean = df_clean[df_clean['Rho(ohm.m)'] > 0]
-            df_clean = df_clean[df_clean['M (mV/V)'] >= 0]
-            
-            # Renommer les colonnes pour la compatibilité
-            df_clean = df_clean.rename(columns={
-                'Rho(ohm.m)': 'resistivity',
-                'M (mV/V)': 'chargeability'
-            })
+            df_clean = df_clean[df_clean['resistivity'] > 0]
+            df_clean = df_clean[df_clean['chargeability'] >= 0]
             
             # Sauvegarder les données nettoyées
             clean_file = self.processed_data_dir / f"{device_name}_cleaned.csv"
@@ -246,14 +263,34 @@ class GeophysicalDataCleaner:
             return False
 
     def _validate_columns(self, df: pd.DataFrame, device_name: str) -> pd.DataFrame:
-        """Ensure required columns are present."""
-        required_cols = CONFIG.geophysical_data.required_columns
+        """Ensure required columns are present and map them to standard names."""
+        df = df.copy()
         
-        # Check if we have at least some of the required columns
+        # Mapping des colonnes vers les noms standard
+        column_mapping = {
+            'Rho(ohm.m)': 'resistivity',
+            'M (mV/V)': 'chargeability',
+            'SP (mV)': 'spontaneous_potential',
+            'xA (m)': 'xA',
+            'xB (m)': 'xB',
+            'xM (m)': 'xM',
+            'xN (m)': 'xN',
+            'Dev. M': 'dev_m',
+            'Dev. M (mV/V)': 'dev_m',
+            'VMN (mV)': 'vmn',
+            'IAB (mA)': 'iab'
+        }
+        
+        # Renommer les colonnes
+        df = df.rename(columns=column_mapping)
+        
+        # Vérifier les colonnes requises
+        required_cols = CONFIG.geophysical_data.required_columns
         available_cols = [col for col in required_cols if col in df.columns]
         
         if len(available_cols) < 2:  # Need at least coordinates and one measurement
             logger.warning(f"Device {device_name}: Missing required columns. Available: {df.columns.tolist()}")
+            logger.warning(f"Required: {required_cols}")
             
         return df
 

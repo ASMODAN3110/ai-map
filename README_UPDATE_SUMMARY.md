@@ -1,73 +1,115 @@
 # 📋 Résumé des Mises à Jour des README - AI-Map
 
-**Mise à jour complète de la documentation du projet AI-Map**
+**Mise à jour complète de la documentation du projet AI-Map avec les modèles opérationnels**
 
 ## 🎯 Objectif
 
-Mettre à jour tous les fichiers README du projet pour refléter les dernières fonctionnalités, tests et améliorations apportées au système AI-Map.
+Mettre à jour tous les fichiers README du projet pour refléter les dernières fonctionnalités, modèles opérationnels, scripts d'exécution et améliorations apportées au système AI-Map.
+
+## 🆕 Nouvelles Fonctionnalités Documentées
+
+### **✅ Modèles CNN Opérationnels**
+- **CNN 2D** : `cnn_2d_model.pth` - Modèle géophysique 2D
+- **CNN 3D** : `cnn_3d_model.pth` - Modèle géophysique 3D
+- **Modèle Hybride** : `hybrid_model.pth` - Images + Données géophysiques
+
+### **✅ Scripts d'Exécution**
+- **run_cnn_2d_model.py** : Exécution du modèle CNN 2D
+- **run_cnn_3d_model.py** : Exécution du modèle CNN 3D
+- **run_hybrid_model.py** : Exécution du modèle hybride
+
+### **✅ Guides d'Utilisation**
+- **GUIDE_UTILISATION_MODEL_CNN2D.md** : Guide complet du modèle CNN 2D
+- **GUIDE_UTILISATION_MODEL_HYBRID.md** : Guide complet du modèle hybride
 
 ## 📊 Mises à Jour Effectuées
 
 ### **1. README.md (Principal)**
 
 #### **✅ Mises à jour :**
-- **Couverture de tests** : Mise à jour de 18 à 115+ tests unitaires
-- **Structure des tests** : Ajout de la structure détaillée avec tous les fichiers de test
-- **Nouvelles fonctionnalités** : Ajout de la section "Nettoyage de Données Géophysiques"
-- **Documentation** : Ajout des liens vers tous les guides spécialisés
+- **Modèles CNN** : Ajout des 3 modèles opérationnels avec leurs spécifications
+- **Scripts d'exécution** : Documentation des scripts run_*.py
+- **Pipeline de traitement** : Mise à jour des phases (Phase 3 ajoutée)
+- **Fonctionnalités principales** : Section réorganisée avec modèles opérationnels
+- **Guides spécialisés** : Ajout des guides d'utilisation des modèles
 
 #### **📈 Améliorations :**
-- **Tests unitaires** : 18 → 115+ tests
-- **Tests d'intégration** : 5 tests (inchangé)
-- **Couverture** : 100% maintenue
-- **Nouveaux modules** : DataCleaner, DataAugmenter, modèles hybrides
+- **Modèles opérationnels** : CNN 2D, CNN 3D, Modèle Hybride
+- **Scripts d'exécution** : 3 scripts prêts à l'utilisation
+- **Documentation** : Guides d'utilisation détaillés
+- **Pipeline** : Phase 3 (Scripts d'Exécution) terminée
 
 ### **2. README_TESTS.md**
 
 #### **✅ Mises à jour :**
-- **Classes testées** : Mise à jour de 4 à 6 classes principales
-- **Tests unitaires** : Mise à jour de 18 à 108 tests pour le trainer seul
-- **Structure détaillée** : Ajout de tous les fichiers de test avec leurs compteurs
-- **Performance** : Mise à jour des temps d'exécution (2 → 5 minutes)
+- **Modèles opérationnels** : Ajout des modèles sauvegardés dans les tests
+- **Tests des modèles** : Section pour tester l'exécution des modèles
+- **Scripts d'exécution** : Tests des scripts run_*.py
 
 #### **📈 Améliorations :**
-- **GeophysicalTrainer** : 18 → 108 tests (7 fichiers)
-- **GeophysicalDataCleaner** : 0 → 23 tests (12 fichiers)
-- **GeophysicalDataAugmenter** : 0 → 31 tests (5 fichiers)
-- **Modèles CNN** : 3 → 20 tests
+- **Tests des modèles** : Validation des modèles sauvegardés
+- **Tests d'exécution** : Vérification des scripts d'exécution
+- **Couverture** : 100% maintenue avec nouveaux tests
 
 ### **3. README_TRAINING.md**
 
 #### **✅ Mises à jour :**
-- **Tests disponibles** : Mise à jour de 18 à 108 tests unitaires
-- **Validation** : Ajout de la mention des tests spécialisés
+- **Modèles opérationnels** : Ajout des 3 modèles avec leurs spécifications
+- **Scripts d'exécution** : Documentation des scripts run_*.py
+- **Exécution des modèles** : Section pour l'utilisation des modèles sauvegardés
+- **Entraînement** : Commandes pour entraîner de nouveaux modèles
 
 #### **📈 Améliorations :**
-- **Couverture** : Tests spécialisés pour chaque fonctionnalité
-- **Robustesse** : Validation complète du pipeline
+- **Modèles disponibles** : CNN 2D, CNN 3D, Modèle Hybride
+- **Scripts d'exécution** : 3 scripts prêts à l'utilisation
+- **Documentation** : Guides d'utilisation détaillés
 
 ### **4. README_INSTALLATION.md**
 
 #### **✅ Mises à jour :**
-- **Statistiques** : Mise à jour de 18 à 115+ tests unitaires
-- **Documentation** : Ajout du lien vers README_DATA_CLEANING.md
+- **Modèles sauvegardés** : Ajout des tests des modèles sauvegardés
+- **Prochaines étapes** : Mise à jour avec les modèles opérationnels
+- **Félicitations** : Ajout des modèles CNN opérationnels
 
 #### **📈 Améliorations :**
-- **Temps d'exécution** : 2 → 5 minutes
+- **Modèles opérationnels** : Tests des modèles sauvegardés
+- **Scripts d'exécution** : Validation des scripts run_*.py
 - **Couverture** : Maintien à 100%
 
-### **5. README_DATA_CLEANING.md (Nouveau)**
+### **5. README_DATA_CLEANING.md**
+
+#### **✅ Mises à jour :**
+- **Intégration avec les modèles** : Ajout de la section sur l'intégration
+- **Pipeline** : Documentation du flux des données vers les modèles
+
+#### **📈 Améliorations :**
+- **Modèles CNN** : Documentation du flux des données nettoyées
+- **Pipeline** : Intégration complète avec les modèles
+
+### **6. README_TRAINING_GUIDE.md**
+
+#### **✅ Mises à jour :**
+- **Modèles opérationnels** : Mise à jour des 3 modèles avec statut opérationnel
+- **Scripts d'exécution** : Ajout des commandes d'exécution des modèles
+- **Caractéristiques** : Spécifications détaillées des modèles
+
+#### **📈 Améliorations :**
+- **Modèles disponibles** : CNN 2D, CNN 3D, Modèle Hybride
+- **Scripts d'exécution** : 3 scripts prêts à l'utilisation
+- **Documentation** : Guides d'utilisation détaillés
+
+### **7. README_UPDATE_SUMMARY.md (Ce fichier)**
 
 #### **✅ Création :**
-- **Guide complet** du module de nettoyage de données
-- **23 fonctionnalités** documentées en détail
-- **Exemples d'utilisation** pratiques
-- **Tests et validation** intégrés
+- **Résumé complet** des mises à jour de tous les README
+- **Modèles opérationnels** documentés
+- **Scripts d'exécution** intégrés
+- **Guides d'utilisation** créés
 
 #### **📈 Contenu :**
-- **Architecture** : Structure et composants
-- **Fonctionnalités** : 12 méthodes principales
-- **Tests** : 23 tests unitaires documentés
+- **Mises à jour** : Résumé de toutes les modifications
+- **Modèles opérationnels** : CNN 2D, CNN 3D, Modèle Hybride
+- **Scripts d'exécution** : run_cnn_2d_model.py, run_cnn_3d_model.py, run_hybrid_model.py
 - **Cas d'usage** : Exemples pratiques
 - **Dépannage** : Solutions aux problèmes courants
 

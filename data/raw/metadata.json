@@ -1,0 +1,71 @@
+{
+  "total_profiles": 28,
+  "total_records": 7474,
+  "profiles": [
+    "profil 1.csv",
+    "profil 10.csv",
+    "profil 11.csv",
+    "profil 12.csv",
+    "profil 13.csv",
+    "profil 14.csv",
+    "profil 15.csv",
+    "profil 2.csv",
+    "profil 3.csv",
+    "profil 5.csv",
+    "profil 6.csv",
+    "profil 7.csv",
+    "profil 8.csv",
+    "profil 9.csv",
+    "profil 1.csv",
+    "profil 10.csv",
+    "profil 11.csv",
+    "profil 12.csv",
+    "profil 13.csv",
+    "profil 14.csv",
+    "profil 15.csv",
+    "profil 2.csv",
+    "profil 3.csv",
+    "profil 5.csv",
+    "profil 6.csv",
+    "profil 7.csv",
+    "profil 8.csv",
+    "profil 9.csv"
+  ],
+  "columns": [
+    "x",
+    "y",
+    "z",
+    "resistivity",
+    "chargeability",
+    "SP (mV)",
+    "xA (m)",
+    "xB (m)",
+    "xM (m)",
+    "xN (m)",
+    "Dev. M (mV/V)",
+    "VMN (mV)",
+    "IAB (mA)",
+    "profil_id",
+    "Dev. M"
+  ],
+  "x_range": [
+    509500.0,
+    511520.0
+  ],
+  "y_range": [
+    458749.0,
+    460000.0
+  ],
+  "z_range": [
+    562.0,
+    658.0
+  ],
+  "resistivity_range": [
+    9.28,
+    2573.74
+  ],
+  "chargeability_range": [
+    -2.86,
+    34.92
+  ]
+}

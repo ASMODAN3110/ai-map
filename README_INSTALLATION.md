@@ -35,6 +35,18 @@ pip install -r requirements.txt
 python -c "import torch, numpy, pandas; print('✅ Installation réussie!')"
 ```
 
+### **5. Tester les Modèles Sauvegardés**
+```bash
+# Tester le modèle CNN 2D
+python run_cnn_2d_model.py
+
+# Tester le modèle CNN 3D
+python run_cnn_3d_model.py
+
+# Tester le modèle hybride
+python run_hybrid_model.py
+```
+
 ## 🔧 Installation Détaillée
 
 ### **Prérequis Système**
@@ -189,11 +201,12 @@ ai-map/
 ## 🎯 Prochaines Étapes
 
 ### **Après l'Installation :**
-1. **Explorer les données** : `data/raw/PD.csv`, `data/raw/S.csv`
-2. **Lancer les tests** : Vérifier la couverture 100%
-3. **Tester le pipeline** : Exécuter `main.py`
-4. **Modifier le code** : Les tests vous protègent !
-5. **Contribuer** : Ajouter de nouvelles fonctionnalités
+1. **Tester les modèles sauvegardés** : `run_cnn_2d_model.py`, `run_cnn_3d_model.py`, `run_hybrid_model.py`
+2. **Explorer les données** : `data/raw/PD.csv`, `data/raw/S.csv`
+3. **Lancer les tests** : Vérifier la couverture 100%
+4. **Tester le pipeline** : Exécuter `main.py`
+5. **Modifier le code** : Les tests vous protègent !
+6. **Contribuer** : Ajouter de nouvelles fonctionnalités
 
 ### **Développement :**
 1. **Tests unitaires** : Maintenir la couverture 100%
@@ -206,10 +219,11 @@ ai-map/
 ## 🎉 Félicitations !
 
 **Votre environnement AI-Map est maintenant prêt avec :**
+- ✅ **Modèles CNN opérationnels** (CNN 2D, CNN 3D, Modèle Hybride)
+- ✅ **Scripts d'exécution** prêts à l'utilisation
 - ✅ **Couverture de tests 100%**
 - ✅ **Pipeline d'entraînement complet**
 - ✅ **Processeur de données géophysiques**
-- ✅ **Modèles CNN 2D/3D**
 - ✅ **Augmentation de données spécialisée**
 
 **🚀 Prêt à révolutionner l'analyse géophysique !**

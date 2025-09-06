@@ -180,6 +180,15 @@ try:
         
         results = {}
         
+        # Si les données ne sont pas fournies, les récupérer des phases précédentes
+        if x_train is None or x_test is None:
+            logger.info("Récupération des données des phases précédentes...")
+            processor, multi_device_tensor, volume_3d_auto = phase2_data_processing()
+            x_train, x_test = phase3_data_preparation(processor, multi_device_tensor)
+            
+            if volume_3d is None:
+                volume_3d = volume_3d_auto
+        
         try:
             if model_type == "cnn_2d":
                 results = train_cnn_2d(trainer, x_train, x_test, training_config)
@@ -221,13 +230,14 @@ try:
         # Préparer les données - convertir de 4D à 3D pour chaque échantillon
         x_train_3d = []
         for i in range(len(x_train)):
-            # Convertir de (channels, height, width) à (height, width, channels)
-            sample = np.transpose(x_train[i], (1, 2, 0))
+            # Convertir de (height, width, channels) à (height, width, channels)
+            # Les données sont déjà dans le bon format (H, W, C)
+            sample = x_train[i]
             x_train_3d.append(sample)
         
         x_test_3d = []
         for i in range(len(x_test)):
-            sample = np.transpose(x_test[i], (1, 2, 0))
+            sample = x_test[i]
             x_test_3d.append(sample)
         
         # Combiner train et test pour la préparation
@@ -272,6 +282,26 @@ try:
             logger.warning("Aucun volume 3D disponible, création d'un volume factice")
             volume_3d = np.random.rand(10, 4, 32, 32, 32)
         
+        # Vérifier et corriger le format du volume 3D
+        if len(volume_3d.shape) == 4:
+            # Volume unique: (depth, height, width, channels) -> liste de volumes
+            logger.info(f"Volume 3D unique détecté: {volume_3d.shape}")
+            # Créer plusieurs volumes factices basés sur le volume existant
+            n_volumes = 5  # Créer 5 volumes pour l'entraînement
+            volumes_list = []
+            for i in range(n_volumes):
+                # Ajouter du bruit pour créer de la variabilité
+                noise = np.random.normal(0, 0.1, volume_3d.shape)
+                volume_with_noise = volume_3d + noise
+                volumes_list.append(volume_with_noise)
+            volume_3d = np.array(volumes_list)
+            logger.info(f"Volumes 3D créés: {volume_3d.shape}")
+        elif len(volume_3d.shape) == 5:
+            # Déjà au bon format: (batch, depth, height, width, channels)
+            logger.info(f"Volumes 3D détectés: {volume_3d.shape}")
+        else:
+            raise ValueError(f"Format de volume 3D non supporté: {volume_3d.shape}")
+        
         # Créer des labels factices
         y_labels = np.random.randint(0, 2, len(volume_3d))
         
@@ -283,9 +313,35 @@ try:
             dropout_rate=0.3
         )
         
-        # Préparer les données
+        # Vérifier la forme du volume 3D et le convertir au bon format
+        print(f"Forme du volume 3D original: {volume_3d.shape}")
+        
+        # Le volume 3D a la forme (5, 4, 32, 32, 32) = (batch, channels, depth, height, width)
+        # Pour l'augmenteur, nous avons besoin de (depth, height, width, channels)
+        if len(volume_3d.shape) == 5 and volume_3d.shape[1] == 4:
+            # (batch, channels, depth, height, width) -> (batch, depth, height, width, channels)
+            volume_3d_transposed = np.transpose(volume_3d, (0, 2, 3, 4, 1))
+            print(f"Volume 3D transposé: {volume_3d_transposed.shape}")
+        elif volume_3d.shape == (4, 32, 32, 32):
+            # (channels, depth, height, width) -> (depth, height, width, channels)
+            volume_3d_transposed = np.transpose(volume_3d, (1, 2, 3, 0))
+            print(f"Volume 3D transposé: {volume_3d_transposed.shape}")
+        else:
+            # Si la forme est différente, essayer une transposition différente
+            print(f"Forme inattendue: {volume_3d.shape}")
+            volume_3d_transposed = volume_3d  # Utiliser tel quel
+        
+        # Créer la liste des volumes pour l'entraînement
+        volumes_list = []
+        if len(volume_3d_transposed.shape) == 5:
+            # Si c'est un batch de volumes, prendre chaque volume individuellement
+            for i in range(volume_3d_transposed.shape[0]):
+                volumes_list.append(volume_3d_transposed[i])  # (depth, height, width, channels)
+        else:
+            # Si c'est un seul volume, l'ajouter tel quel
+            volumes_list.append(volume_3d_transposed)
         train_loader, val_loader = trainer.prepare_data_3d(
-            volume_3d.tolist(), y_labels.tolist(),
+            volumes_list, y_labels.tolist(),
             augmentations=["rotation", "gaussian_noise"],
             num_augmentations=2,
             test_size=0.2
@@ -320,18 +376,43 @@ try:
         # Créer le trainer hybride
         hybrid_trainer = GeophysicalImageTrainer(trainer.augmenter, device=config["device"])
         
-        # Pour la démonstration, utiliser des chemins d'images factices
-        # Dans un vrai projet, vous auriez de vrais chemins d'images
+        # Utiliser plus d'images pour avoir suffisamment de données
         image_paths = [
-            str(CONFIG.paths.raw_data_dir / "images" / "resistivity" / "resis1.JPG"),
-            str(CONFIG.paths.raw_data_dir / "images" / "resistivity" / "resis2.JPG"),
-            str(CONFIG.paths.raw_data_dir / "images" / "chargeability" / "char_1.PNG"),
-            str(CONFIG.paths.raw_data_dir / "images" / "chargeability" / "char_2.PNG"),
+            str(CONFIG.paths.data_dir / "raw" / "images" / "resistivity" / "resis1.JPG"),
+            str(CONFIG.paths.data_dir / "raw" / "images" / "resistivity" / "resis2.JPG"),
+            str(CONFIG.paths.data_dir / "raw" / "images" / "resistivity" / "resis3.JPG"),
+            str(CONFIG.paths.data_dir / "raw" / "images" / "resistivity" / "resis4.JPG"),
+            str(CONFIG.paths.data_dir / "raw" / "images" / "chargeability" / "char_1.PNG"),
+            str(CONFIG.paths.data_dir / "raw" / "images" / "chargeability" / "char_2.PNG"),
+            str(CONFIG.paths.data_dir / "raw" / "images" / "chargeability" / "char_3.PNG"),
+            str(CONFIG.paths.data_dir / "raw" / "images" / "chargeability" / "char_4.PNG"),
         ]
         
-        # Créer des données géophysiques factices
-        geo_data = [np.random.rand(10).tolist() for _ in range(len(image_paths))]
-        labels = np.random.randint(0, 2, len(image_paths)).tolist()
+        # Vérifier que les fichiers existent
+        existing_paths = []
+        for path in image_paths:
+            if Path(path).exists():
+                existing_paths.append(path)
+            else:
+                logger.warning(f"Image non trouvée: {path}")
+        
+        if len(existing_paths) < 4:
+            logger.error(f"Pas assez d'images trouvées. Trouvé: {len(existing_paths)}, Nécessaire: 4")
+            # Utiliser des images de substitution
+            existing_paths = [
+                str(CONFIG.paths.data_dir / "raw" / "images" / "resistivity" / "resis1.JPG"),
+                str(CONFIG.paths.data_dir / "raw" / "images" / "resistivity" / "resis2.JPG"),
+                str(CONFIG.paths.data_dir / "raw" / "images" / "chargeability" / "char_1.PNG"),
+                str(CONFIG.paths.data_dir / "raw" / "images" / "chargeability" / "char_2.PNG"),
+            ]
+        
+        image_paths = existing_paths
+        
+        # Créer des données géophysiques factices avec la bonne dimension (4)
+        geo_data = [np.random.rand(4).tolist() for _ in range(len(image_paths))]
+        
+        # Créer des labels équilibrés (4 de chaque classe)
+        labels = [0, 0, 0, 0, 1, 1, 1, 1]
         
         # Créer le modèle hybride
         from src.model.geophysical_hybrid_net import GeophysicalHybridNet

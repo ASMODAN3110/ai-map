@@ -12,7 +12,7 @@ class Paths:
     base_dir: Path = BASE_DIR
     data_dir: Path = BASE_DIR / "data"
     artifacts_dir: Path = BASE_DIR / "artifacts"
-    raw_data_dir: Path = BASE_DIR / "data/raw"
+    raw_data_dir: Path = BASE_DIR / "data/raw/csv/profiles_fixed"
     processed_data_dir: Path = BASE_DIR / "data/processed"
     intermediate_data_dir: Path = BASE_DIR / "data/intermediate"
 
