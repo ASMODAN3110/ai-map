@@ -20,7 +20,7 @@ from unittest.mock import patch, MagicMock
 # Ajouter le répertoire parent au path Python
 sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
 
-from src.preprocessor.data_cleaner import GeophysicalDataCleaner
+from backend.preprocessor.data_cleaner import GeophysicalDataCleaner, read_csv_with_auto_separator, normalize_coordinate_columns
 
 
 class TestDataCleanerRemoveOutliers(unittest.TestCase):
@@ -34,7 +34,7 @@ class TestDataCleanerRemoveOutliers(unittest.TestCase):
         self.test_dir = self.project_root / "test" / "fixtures"
         
         # Créer une instance du cleaner avec les vrais chemins
-        with patch('src.preprocessor.data_cleaner.CONFIG') as mock_config:
+        with patch('backend.preprocessor.data_cleaner.CONFIG') as mock_config:
             mock_config.paths.raw_data_dir = str(self.raw_data_dir)
             mock_config.paths.processed_data_dir = str(self.test_dir / "processed")
             mock_config.geophysical_data.coordinate_systems = {
@@ -60,12 +60,13 @@ class TestDataCleanerRemoveOutliers(unittest.TestCase):
         pd_file = self.raw_data_dir / "PD.csv"
         self.assertTrue(pd_file.exists(), f"Le fichier {pd_file} n'existe pas")
         
-        df_pd = pd.read_csv(pd_file, sep=';')
+        df_pd = read_csv_with_auto_separator(pd_file)
+        df_pd = normalize_coordinate_columns(df_pd)
         self.assertIsInstance(df_pd, pd.DataFrame)
         self.assertGreater(len(df_pd), 0, "PD.csv ne devrait pas être vide")
         
         # Vérifier que les colonnes géophysiques sont présentes
-        geophysical_cols = ['Rho(ohm.m)', 'M (mV/V)']
+        geophysical_cols = ['resistivity', 'chargeability']
         for col in geophysical_cols:
             self.assertIn(col, df_pd.columns, f"Colonne {col} manquante dans PD.csv")
         
@@ -93,12 +94,13 @@ class TestDataCleanerRemoveOutliers(unittest.TestCase):
         s_file = self.raw_data_dir / "S.csv"
         self.assertTrue(s_file.exists(), f"Le fichier {s_file} n'existe pas")
         
-        df_s = pd.read_csv(s_file, sep=';')
+        df_s = read_csv_with_auto_separator(s_file)
+        df_s = normalize_coordinate_columns(df_s)
         self.assertIsInstance(df_s, pd.DataFrame)
         self.assertGreater(len(df_s), 0, "S.csv ne devrait pas être vide")
         
         # Vérifier que les colonnes géophysiques sont présentes
-        geophysical_cols = ['Rho (Ohm.m)', 'M (mV/V)']
+        geophysical_cols = ['resistivity', 'chargeability']
         for col in geophysical_cols:
             self.assertIn(col, df_s.columns, f"Colonne {col} manquante dans S.csv")
         
@@ -124,12 +126,14 @@ class TestDataCleanerRemoveOutliers(unittest.TestCase):
         """Test de suppression des valeurs aberrantes des deux fichiers CSV ensemble"""
         # Tester PD.csv
         pd_file = self.raw_data_dir / "PD.csv"
-        df_pd = pd.read_csv(pd_file, sep=';')
+        df_pd = read_csv_with_auto_separator(pd_file)
+        df_pd = normalize_coordinate_columns(df_pd)
         cleaned_pd = self.cleaner._remove_outliers(df_pd)
         
         # Tester S.csv
         s_file = self.raw_data_dir / "S.csv"
-        df_s = pd.read_csv(s_file, sep=';')
+        df_s = read_csv_with_auto_separator(s_file)
+        df_s = normalize_coordinate_columns(df_s)
         cleaned_s = self.cleaner._remove_outliers(df_s)
         
         # Vérifier que les deux nettoyages ont réussi
@@ -288,7 +292,8 @@ class TestDataCleanerRemoveOutliers(unittest.TestCase):
         """Test de performance de la suppression des valeurs aberrantes"""
         # Tester PD.csv
         pd_file = self.raw_data_dir / "PD.csv"
-        df_pd = pd.read_csv(pd_file, sep=';')
+        df_pd = read_csv_with_auto_separator(pd_file)
+        df_pd = normalize_coordinate_columns(df_pd)
         
         start_time = time.time()
         cleaned_pd = self.cleaner._remove_outliers(df_pd)
@@ -299,7 +304,8 @@ class TestDataCleanerRemoveOutliers(unittest.TestCase):
         
         # Tester S.csv
         s_file = self.raw_data_dir / "S.csv"
-        df_s = pd.read_csv(s_file, sep=';')
+        df_s = read_csv_with_auto_separator(s_file)
+        df_s = normalize_coordinate_columns(df_s)
         
         start_time = time.time()
         cleaned_s = self.cleaner._remove_outliers(df_s)
@@ -394,16 +400,18 @@ class TestDataCleanerRemoveOutliers(unittest.TestCase):
         pd_file = self.raw_data_dir / "PD.csv"
         s_file = self.raw_data_dir / "S.csv"
         
-        df_pd = pd.read_csv(pd_file, sep=';')
-        df_s = pd.read_csv(s_file, sep=';')
+        df_pd = read_csv_with_auto_separator(pd_file)
+        df_pd = normalize_coordinate_columns(df_pd)
+        df_s = read_csv_with_auto_separator(s_file)
+        df_s = normalize_coordinate_columns(df_s)
         
-        # PD.csv utilise 'Rho(ohm.m)' et 'M (mV/V)'
-        pd_resistivity_col = 'Rho(ohm.m)'
-        pd_chargeability_col = 'M (mV/V)'
+        # Les deux fichiers utilisent maintenant des colonnes normalisées
+        pd_resistivity_col = 'resistivity'
+        pd_chargeability_col = 'chargeability'
         
-        # S.csv utilise 'Rho (Ohm.m)' et 'M (mV/V)'
-        s_resistivity_col = 'Rho (Ohm.m)'
-        s_chargeability_col = 'M (mV/V)'
+        # S.csv utilise les mêmes colonnes normalisées
+        s_resistivity_col = 'resistivity'
+        s_chargeability_col = 'chargeability'
         
         # Vérifier que les colonnes existent dans les deux fichiers
         self.assertIn(pd_resistivity_col, df_pd.columns, f"Colonne {pd_resistivity_col} manquante dans PD.csv")

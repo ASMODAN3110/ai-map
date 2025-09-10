@@ -20,7 +20,7 @@ from unittest.mock import patch, MagicMock
 # Ajouter le répertoire parent au path Python
 sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
 
-from src.preprocessor.data_cleaner import GeophysicalDataCleaner
+from backend.preprocessor.data_cleaner import GeophysicalDataCleaner
 
 
 class TestDataCleanerNormalizeGeophysicalValues(unittest.TestCase):
@@ -34,7 +34,7 @@ class TestDataCleanerNormalizeGeophysicalValues(unittest.TestCase):
         self.test_dir = self.project_root / "test" / "fixtures"
         
         # Créer une instance du cleaner avec les vrais chemins
-        with patch('src.preprocessor.data_cleaner.CONFIG') as mock_config:
+        with patch('backend.preprocessor.data_cleaner.CONFIG') as mock_config:
             mock_config.paths.raw_data_dir = str(self.raw_data_dir)
             mock_config.paths.processed_data_dir = str(self.test_dir / "processed")
             mock_config.geophysical_data.coordinate_systems = {
@@ -60,12 +60,17 @@ class TestDataCleanerNormalizeGeophysicalValues(unittest.TestCase):
         pd_file = self.raw_data_dir / "PD.csv"
         self.assertTrue(pd_file.exists(), f"Le fichier {pd_file} n'existe pas")
         
+        # Charger et parser les données correctement
         df_pd = pd.read_csv(pd_file, sep=';')
+        # Séparer la colonne combinée en colonnes individuelles
+        df_pd = df_pd['x,y,z,resistivity,chargeability,profil_id'].str.split(',', expand=True)
+        df_pd.columns = ['x', 'y', 'z', 'resistivity', 'chargeability', 'profil_id']
+        
         self.assertIsInstance(df_pd, pd.DataFrame)
         self.assertGreater(len(df_pd), 0, "PD.csv ne devrait pas être vide")
         
         # Vérifier que les colonnes géophysiques sont présentes
-        geophysical_cols = ['Rho(ohm.m)', 'M (mV/V)']
+        geophysical_cols = ['resistivity', 'chargeability']
         for col in geophysical_cols:
             self.assertIn(col, df_pd.columns, f"Colonne {col} manquante dans PD.csv")
         
@@ -98,12 +103,17 @@ class TestDataCleanerNormalizeGeophysicalValues(unittest.TestCase):
         s_file = self.raw_data_dir / "S.csv"
         self.assertTrue(s_file.exists(), f"Le fichier {s_file} n'existe pas")
         
+        # Charger et parser les données correctement
         df_s = pd.read_csv(s_file, sep=';')
+        # Séparer la colonne combinée en colonnes individuelles
+        df_s = df_s['x,y,z,resistivity,chargeability,profil_id'].str.split(',', expand=True)
+        df_s.columns = ['x', 'y', 'z', 'resistivity', 'chargeability', 'profil_id']
+        
         self.assertIsInstance(df_s, pd.DataFrame)
         self.assertGreater(len(df_s), 0, "S.csv ne devrait pas être vide")
         
         # Vérifier que les colonnes géophysiques sont présentes
-        geophysical_cols = ['Rho (Ohm.m)', 'M (mV/V)']
+        geophysical_cols = ['resistivity', 'chargeability']
         for col in geophysical_cols:
             self.assertIn(col, df_s.columns, f"Colonne {col} manquante dans S.csv")
         
@@ -386,26 +396,28 @@ class TestDataCleanerNormalizeGeophysicalValues(unittest.TestCase):
     
     def test_normalize_geophysical_values_column_mapping(self):
         """Test de la correspondance des noms de colonnes entre les fichiers"""
-        # Vérifier que PD.csv et S.csv utilisent des noms de colonnes différents
+        # Vérifier que PD.csv et S.csv utilisent des noms de colonnes cohérents
         pd_file = self.raw_data_dir / "PD.csv"
         s_file = self.raw_data_dir / "S.csv"
         
+        # Charger et parser les données correctement
         df_pd = pd.read_csv(pd_file, sep=';')
+        df_pd = df_pd['x,y,z,resistivity,chargeability,profil_id'].str.split(',', expand=True)
+        df_pd.columns = ['x', 'y', 'z', 'resistivity', 'chargeability', 'profil_id']
+        
         df_s = pd.read_csv(s_file, sep=';')
+        df_s = df_s['x,y,z,resistivity,chargeability,profil_id'].str.split(',', expand=True)
+        df_s.columns = ['x', 'y', 'z', 'resistivity', 'chargeability', 'profil_id']
         
-        # PD.csv utilise 'Rho(ohm.m)' et 'M (mV/V)'
-        pd_resistivity_col = 'Rho(ohm.m)'
-        pd_chargeability_col = 'M (mV/V)'
-        
-        # S.csv utilise 'Rho (Ohm.m)' et 'M (mV/V)'
-        s_resistivity_col = 'Rho (Ohm.m)'
-        s_chargeability_col = 'M (mV/V)'
+        # Les deux fichiers utilisent maintenant les mêmes noms de colonnes
+        resistivity_col = 'resistivity'
+        chargeability_col = 'chargeability'
         
         # Vérifier que les colonnes existent dans les deux fichiers
-        self.assertIn(pd_resistivity_col, df_pd.columns, f"Colonne {pd_resistivity_col} manquante dans PD.csv")
-        self.assertIn(pd_chargeability_col, df_pd.columns, f"Colonne {pd_chargeability_col} manquante dans PD.csv")
-        self.assertIn(s_resistivity_col, df_s.columns, f"Colonne {s_resistivity_col} manquante dans S.csv")
-        self.assertIn(s_chargeability_col, df_s.columns, f"Colonne {s_chargeability_col} manquante dans S.csv")
+        self.assertIn(resistivity_col, df_pd.columns, f"Colonne {resistivity_col} manquante dans PD.csv")
+        self.assertIn(chargeability_col, df_pd.columns, f"Colonne {chargeability_col} manquante dans PD.csv")
+        self.assertIn(resistivity_col, df_s.columns, f"Colonne {resistivity_col} manquante dans S.csv")
+        self.assertIn(chargeability_col, df_s.columns, f"Colonne {chargeability_col} manquante dans S.csv")
         
         # Tester la normalisation sur les deux fichiers
         normalized_pd = self.cleaner._normalize_geophysical_values(df_pd)

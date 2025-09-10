@@ -18,7 +18,7 @@ from unittest.mock import patch, MagicMock
 # Ajouter le répertoire parent au path Python
 sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
 
-from src.preprocessor.data_cleaner import GeophysicalDataCleaner
+from backend.preprocessor.data_cleaner import GeophysicalDataCleaner, read_csv_with_auto_separator
 
 
 class TestDataCleanerValidateColumns(unittest.TestCase):
@@ -26,13 +26,13 @@ class TestDataCleanerValidateColumns(unittest.TestCase):
     
     def setUp(self):
         """Configuration avant chaque test"""
-        # Utiliser les vrais fichiers de données du projet
+      # Utiliser les vrais fichiers de données
         self.project_root = Path(__file__).parent.parent.parent.parent
         self.raw_data_dir = self.project_root / "data" / "raw"
         self.test_dir = self.project_root / "test" / "fixtures"
         
         # Créer une instance du cleaner avec les vrais chemins
-        with patch('src.preprocessor.data_cleaner.CONFIG') as mock_config:
+        with patch('backend.preprocessor.data_cleaner.CONFIG') as mock_config:
             mock_config.paths.raw_data_dir = str(self.raw_data_dir)
             mock_config.paths.processed_data_dir = str(self.test_dir / "processed")
             mock_config.geophysical_data.coordinate_systems = {
@@ -62,7 +62,7 @@ class TestDataCleanerValidateColumns(unittest.TestCase):
         pd_file = self.raw_data_dir / "PD.csv"
         self.assertTrue(pd_file.exists(), f"Le fichier {pd_file} n'existe pas")
         
-        df_pd = pd.read_csv(pd_file, sep=';')
+        df_pd = read_csv_with_auto_separator(pd_file)
         self.assertIsInstance(df_pd, pd.DataFrame)
         self.assertGreater(len(df_pd), 0, "PD.csv ne devrait pas être vide")
         
@@ -75,7 +75,7 @@ class TestDataCleanerValidateColumns(unittest.TestCase):
         self.assertEqual(len(validated_df.columns), len(df_pd.columns), "Le nombre de colonnes ne devrait pas changer")
         
         # Vérifier que les colonnes importantes sont présentes
-        expected_cols_pd = ['x', 'y', 'z', 'Rho(ohm.m)', 'M (mV/V)']
+        expected_cols_pd = ['x', 'y', 'z', 'resistivity', 'chargeability']
         for col in expected_cols_pd:
             self.assertIn(col, validated_df.columns, f"Colonne {col} manquante dans PD.csv")
         
@@ -87,7 +87,7 @@ class TestDataCleanerValidateColumns(unittest.TestCase):
         s_file = self.raw_data_dir / "S.csv"
         self.assertTrue(s_file.exists(), f"Le fichier {s_file} n'existe pas")
         
-        df_s = pd.read_csv(s_file, sep=';')
+        df_s = read_csv_with_auto_separator(s_file)
         self.assertIsInstance(df_s, pd.DataFrame)
         self.assertGreater(len(df_s), 0, "S.csv ne devrait pas être vide")
         
@@ -100,7 +100,7 @@ class TestDataCleanerValidateColumns(unittest.TestCase):
         self.assertEqual(len(validated_df.columns), len(df_s.columns), "Le nombre de colonnes ne devrait pas changer")
         
         # Vérifier que les colonnes importantes sont présentes
-        expected_cols_s = ['El-array', 'LAT', 'LON', 'Rho (Ohm.m)', 'M (mV/V)']
+        expected_cols_s = ['El-array', 'LAT', 'LON', 'Rho (Ohm.m)', 'chargeability']
         for col in expected_cols_s:
             self.assertIn(col, validated_df.columns, f"Colonne {col} manquante dans S.csv")
         
@@ -110,12 +110,12 @@ class TestDataCleanerValidateColumns(unittest.TestCase):
         """Test de validation des colonnes des deux fichiers CSV ensemble"""
         # Tester PD.csv
         pd_file = self.raw_data_dir / "PD.csv"
-        df_pd = pd.read_csv(pd_file, sep=';')
+        df_pd = read_csv_with_auto_separator(pd_file)
         validated_pd = self.cleaner._validate_columns(df_pd, "pole_dipole")
         
         # Tester S.csv
         s_file = self.raw_data_dir / "S.csv"
-        df_s = pd.read_csv(s_file, sep=';')
+        df_s = read_csv_with_auto_separator(s_file)
         validated_s = self.cleaner._validate_columns(df_s, "schlumberger")
         
         # Vérifier que les deux validations ont réussi
@@ -132,7 +132,7 @@ class TestDataCleanerValidateColumns(unittest.TestCase):
         """Test de validation des colonnes de coordonnées"""
         # Tester PD.csv (coordonnées x, y, z)
         pd_file = self.raw_data_dir / "PD.csv"
-        df_pd = pd.read_csv(pd_file, sep=';')
+        df_pd = read_csv_with_auto_separator(pd_file)
         validated_pd = self.cleaner._validate_columns(df_pd, "pole_dipole")
         
         # Vérifier les colonnes de coordonnées
@@ -144,7 +144,7 @@ class TestDataCleanerValidateColumns(unittest.TestCase):
         
         # Tester S.csv (coordonnées LAT, LON)
         s_file = self.raw_data_dir / "S.csv"
-        df_s = pd.read_csv(s_file, sep=';')
+        df_s = read_csv_with_auto_separator(s_file)
         validated_s = self.cleaner._validate_columns(df_s, "schlumberger")
         
         # Vérifier les colonnes de coordonnées
@@ -160,26 +160,26 @@ class TestDataCleanerValidateColumns(unittest.TestCase):
         """Test de validation des colonnes de mesures géophysiques"""
         # Tester PD.csv (résistivité et chargeabilité)
         pd_file = self.raw_data_dir / "PD.csv"
-        df_pd = pd.read_csv(pd_file, sep=';')
+        df_pd = read_csv_with_auto_separator(pd_file)
         validated_pd = self.cleaner._validate_columns(df_pd, "pole_dipole")
         
         # Vérifier les colonnes de mesures
-        measurement_cols_pd = ['Rho(ohm.m)', 'M (mV/V)']
+        measurement_cols_pd = ['resistivity', 'chargeability']
         for col in measurement_cols_pd:
             self.assertIn(col, validated_pd.columns, f"Colonne de mesure {col} manquante dans PD.csv")
             # Vérifier que les mesures sont numériques
             self.assertTrue(pd.api.types.is_numeric_dtype(validated_pd[col]), f"Colonne {col} devrait être numérique")
             # Vérifier que les valeurs sont positives (pour la résistivité et chargeabilité)
-            if col == 'Rho(ohm.m)':
+            if col == 'resistivity':
                 self.assertTrue((validated_pd[col] > 0).all(), f"Toutes les valeurs de {col} devraient être positives")
         
         # Tester S.csv (résistivité et chargeabilité)
         s_file = self.raw_data_dir / "S.csv"
-        df_s = pd.read_csv(s_file, sep=';')
+        df_s = read_csv_with_auto_separator(s_file)
         validated_s = self.cleaner._validate_columns(df_s, "schlumberger")
         
         # Vérifier les colonnes de mesures
-        measurement_cols_s = ['Rho (Ohm.m)', 'M (mV/V)']
+        measurement_cols_s = ['Rho (Ohm.m)', 'chargeability']
         for col in measurement_cols_s:
             self.assertIn(col, validated_s.columns, f"Colonne de mesure {col} manquante dans S.csv")
             # Vérifier que les mesures sont numériques
@@ -194,7 +194,7 @@ class TestDataCleanerValidateColumns(unittest.TestCase):
         """Test de l'intégrité des données après validation"""
         # Tester PD.csv
         pd_file = self.raw_data_dir / "PD.csv"
-        df_pd_original = pd.read_csv(pd_file, sep=';')
+        df_pd_original = read_csv_with_auto_separator(pd_file)
         validated_pd = self.cleaner._validate_columns(df_pd_original, "pole_dipole")
         
         # Vérifier que les données sont préservées
@@ -209,7 +209,7 @@ class TestDataCleanerValidateColumns(unittest.TestCase):
         
         # Tester S.csv
         s_file = self.raw_data_dir / "S.csv"
-        df_s_original = pd.read_csv(s_file, sep=';')
+        df_s_original = read_csv_with_auto_separator(s_file)
         validated_s = self.cleaner._validate_columns(df_s_original, "schlumberger")
         
         # Vérifier que les données sont préservées
@@ -285,7 +285,7 @@ class TestDataCleanerValidateColumns(unittest.TestCase):
         
         # Tester PD.csv
         pd_file = self.raw_data_dir / "PD.csv"
-        df_pd = pd.read_csv(pd_file, sep=';')
+        df_pd = read_csv_with_auto_separator(pd_file)
         
         start_time = time.time()
         validated_pd = self.cleaner._validate_columns(df_pd, "pole_dipole")
@@ -296,7 +296,7 @@ class TestDataCleanerValidateColumns(unittest.TestCase):
         
         # Tester S.csv
         s_file = self.raw_data_dir / "S.csv"
-        df_s = pd.read_csv(s_file, sep=';')
+        df_s = read_csv_with_auto_separator(s_file)
         
         start_time = time.time()
         validated_s = self.cleaner._validate_columns(df_s, "schlumberger")

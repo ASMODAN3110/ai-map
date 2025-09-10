@@ -20,8 +20,8 @@ current_dir = Path(__file__).resolve().parent
 project_root = current_dir.parent.parent.parent
 sys.path.insert(0, str(project_root))
 
-from src.data.data_processor import GeophysicalDataProcessor
-from src.utils.logger import logger
+from backend.data.data_processor import GeophysicalDataProcessor
+from backend.utils.logger import logger
 
 
 class TestGeophysicalDataProcessor(unittest.TestCase):

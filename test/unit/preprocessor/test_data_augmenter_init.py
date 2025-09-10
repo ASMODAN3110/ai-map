@@ -15,8 +15,8 @@ import time
 # Ajouter le répertoire parent au path Python
 sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
 
-from src.preprocessor.data_augmenter import GeophysicalDataAugmenter
-from src.preprocessor.data_cleaner import GeophysicalDataCleaner
+from backend.preprocessor.data_augmenter import GeophysicalDataAugmenter
+from backend.preprocessor.data_cleaner import GeophysicalDataCleaner
 from config import CONFIG
 
 

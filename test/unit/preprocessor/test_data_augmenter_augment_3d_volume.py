@@ -18,8 +18,8 @@ from unittest.mock import patch, MagicMock
 # Ajouter le répertoire parent au path Python
 sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
 
-from src.preprocessor.data_augmenter import GeophysicalDataAugmenter
-from src.preprocessor.data_cleaner import GeophysicalDataCleaner
+from backend.preprocessor.data_augmenter import GeophysicalDataAugmenter
+from backend.preprocessor.data_cleaner import GeophysicalDataCleaner
 
 
 class TestDataAugmenterAugment3dVolume(unittest.TestCase):
@@ -48,7 +48,7 @@ class TestDataAugmenterAugment3dVolume(unittest.TestCase):
             shutil.copy2(self.s_test_file, self.test_raw_dir / "S.csv")
         
         # Créer une instance du cleaner avec des chemins de test
-        with patch('src.preprocessor.data_cleaner.CONFIG') as mock_config:
+        with patch('backend.preprocessor.data_cleaner.CONFIG') as mock_config:
             mock_config.paths.raw_data_dir = str(self.test_raw_dir)
             mock_config.paths.processed_data_dir = str(self.test_processed_dir)
             mock_config.geophysical_data.coordinate_systems = {

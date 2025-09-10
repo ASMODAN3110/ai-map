@@ -19,7 +19,7 @@ from unittest.mock import patch, MagicMock
 # Ajouter le répertoire parent au path Python
 sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
 
-from src.preprocessor.data_cleaner import GeophysicalDataCleaner
+from backend.preprocessor.data_cleaner import GeophysicalDataCleaner
 
 
 class TestDataCleanerHandleMissingValues(unittest.TestCase):
@@ -33,7 +33,7 @@ class TestDataCleanerHandleMissingValues(unittest.TestCase):
         self.test_dir = self.project_root / "test" / "fixtures"
         
         # Créer une instance du cleaner avec les vrais chemins
-        with patch('src.preprocessor.data_cleaner.CONFIG') as mock_config:
+        with patch('backend.preprocessor.data_cleaner.CONFIG') as mock_config:
             mock_config.paths.raw_data_dir = str(self.raw_data_dir)
             mock_config.paths.processed_data_dir = str(self.test_dir / "processed")
             mock_config.geophysical_data.coordinate_systems = {
@@ -59,7 +59,16 @@ class TestDataCleanerHandleMissingValues(unittest.TestCase):
         pd_file = self.raw_data_dir / "PD.csv"
         self.assertTrue(pd_file.exists(), f"Le fichier {pd_file} n'existe pas")
         
+        # Charger et parser les données correctement
         df_pd = pd.read_csv(pd_file, sep=';')
+        df_pd = df_pd['x,y,z,resistivity,chargeability,profil_id'].str.split(',', expand=True)
+        df_pd.columns = ['x', 'y', 'z', 'resistivity', 'chargeability', 'profil_id']
+        
+        # Convertir les colonnes numériques
+        numeric_cols = ['x', 'y', 'z', 'resistivity', 'chargeability']
+        for col in numeric_cols:
+            df_pd[col] = pd.to_numeric(df_pd[col], errors='coerce')
+        
         self.assertIsInstance(df_pd, pd.DataFrame)
         self.assertGreater(len(df_pd), 0, "PD.csv ne devrait pas être vide")
         
@@ -95,13 +104,22 @@ class TestDataCleanerHandleMissingValues(unittest.TestCase):
         s_file = self.raw_data_dir / "S.csv"
         self.assertTrue(s_file.exists(), f"Le fichier {s_file} n'existe pas")
         
+        # Charger et parser les données correctement
         df_s = pd.read_csv(s_file, sep=';')
+        df_s = df_s['x,y,z,resistivity,chargeability,profil_id'].str.split(',', expand=True)
+        df_s.columns = ['x', 'y', 'z', 'resistivity', 'chargeability', 'profil_id']
+        
+        # Convertir les colonnes numériques
+        numeric_cols = ['x', 'y', 'z', 'resistivity', 'chargeability']
+        for col in numeric_cols:
+            df_s[col] = pd.to_numeric(df_s[col], errors='coerce')
+        
         self.assertIsInstance(df_s, pd.DataFrame)
         self.assertGreater(len(df_s), 0, "S.csv ne devrait pas être vide")
         
         # Compter les valeurs manquantes initiales
         initial_count = len(df_s)
-        initial_missing_coords = df_s[['LAT', 'LON']].isna().any(axis=1).sum()
+        initial_missing_coords = df_s[['x', 'y', 'z']].isna().any(axis=1).sum()
         
         # Appeler la méthode de gestion des valeurs manquantes
         cleaned_df = self.cleaner._handle_missing_values(df_s)
@@ -111,7 +129,7 @@ class TestDataCleanerHandleMissingValues(unittest.TestCase):
         self.assertLessEqual(len(cleaned_df), initial_count, "Le nombre de lignes ne devrait pas augmenter")
         
         # Vérifier qu'il n'y a plus de valeurs manquantes dans les coordonnées
-        coord_cols = ['LAT', 'LON']
+        coord_cols = ['x', 'y', 'z']
         for col in coord_cols:
             if col in cleaned_df.columns:
                 missing_count = cleaned_df[col].isna().sum()
@@ -119,8 +137,9 @@ class TestDataCleanerHandleMissingValues(unittest.TestCase):
         
         # Vérifier que les données sont préservées pour les lignes valides
         if len(cleaned_df) > 0:
-            self.assertTrue(pd.api.types.is_numeric_dtype(cleaned_df['LAT']))
-            self.assertTrue(pd.api.types.is_numeric_dtype(cleaned_df['LON']))
+            self.assertTrue(pd.api.types.is_numeric_dtype(cleaned_df['x']))
+            self.assertTrue(pd.api.types.is_numeric_dtype(cleaned_df['y']))
+            self.assertTrue(pd.api.types.is_numeric_dtype(cleaned_df['z']))
         
         print(f"✅ Valeurs manquantes gérées dans S.csv: {initial_count} → {len(cleaned_df)} lignes, {initial_missing_coords} coordonnées manquantes supprimées")
     
@@ -152,19 +171,27 @@ class TestDataCleanerHandleMissingValues(unittest.TestCase):
         pd_file = self.raw_data_dir / "PD.csv"
         df_pd = pd.read_csv(pd_file, sep=';')
         
+        # Parser les données correctement
+        df_pd = df_pd['x,y,z,resistivity,chargeability,profil_id'].str.split(',', expand=True)
+        df_pd.columns = ['x', 'y', 'z', 'resistivity', 'chargeability', 'profil_id']
+        
         # Vérifier que les colonnes de coordonnées sont détectées
         coord_cols = ['x', 'y', 'z']
         detected_cols = [col for col in coord_cols if col in df_pd.columns]
         self.assertEqual(len(detected_cols), 3, "Toutes les colonnes de coordonnées devraient être détectées dans PD.csv")
         
-        # Tester S.csv (coordonnées LAT, LON)
+        # Tester S.csv (coordonnées x, y, z)
         s_file = self.raw_data_dir / "S.csv"
         df_s = pd.read_csv(s_file, sep=';')
         
+        # Parser les données correctement
+        df_s = df_s['x,y,z,resistivity,chargeability,profil_id'].str.split(',', expand=True)
+        df_s.columns = ['x', 'y', 'z', 'resistivity', 'chargeability', 'profil_id']
+        
         # Vérifier que les colonnes de coordonnées sont détectées
-        coord_cols_s = ['LAT', 'LON']
+        coord_cols_s = ['x', 'y', 'z']
         detected_cols_s = [col for col in coord_cols_s if col in df_s.columns]
-        self.assertEqual(len(detected_cols_s), 2, "Toutes les colonnes de coordonnées devraient être détectées dans S.csv")
+        self.assertEqual(len(detected_cols_s), 3, "Toutes les colonnes de coordonnées devraient être détectées dans S.csv")
         
         print("✅ Détection automatique des colonnes de coordonnées réussie")
     

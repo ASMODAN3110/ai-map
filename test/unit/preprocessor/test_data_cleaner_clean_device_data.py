@@ -18,7 +18,7 @@ from unittest.mock import patch, MagicMock
 # Ajouter le répertoire parent au path Python
 sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
 
-from src.preprocessor.data_cleaner import GeophysicalDataCleaner
+from backend.preprocessor.data_cleaner import GeophysicalDataCleaner
 
 
 class TestDataCleanerCleanDeviceData(unittest.TestCase):
@@ -35,10 +35,10 @@ class TestDataCleanerCleanDeviceData(unittest.TestCase):
         self.test_raw_dir.mkdir(parents=True, exist_ok=True)
         self.test_processed_dir.mkdir(exist_ok=True)
         
-        # Copier les fichiers de test depuis fixtures
-        fixtures_dir = Path(__file__).parent.parent.parent / "fixtures" / "raw"
-        self.pd_test_file = fixtures_dir / "PD.csv"
-        self.s_test_file = fixtures_dir / "S.csv"
+        # Copier les fichiers de test depuis les vrais fichiers de données
+        data_dir = Path(__file__).parent.parent.parent.parent / "data" / "raw"
+        self.pd_test_file = data_dir / "PD.csv"
+        self.s_test_file = data_dir / "S.csv"
         
         # Copier les fichiers vers le dossier de test
         if self.pd_test_file.exists():
@@ -47,7 +47,7 @@ class TestDataCleanerCleanDeviceData(unittest.TestCase):
             shutil.copy2(self.s_test_file, self.test_raw_dir / "S.csv")
         
         # Créer une instance du cleaner avec des chemins de test
-        with patch('src.preprocessor.data_cleaner.CONFIG') as mock_config:
+        with patch('backend.preprocessor.data_cleaner.CONFIG') as mock_config:
             mock_config.paths.raw_data_dir = str(self.test_raw_dir)
             mock_config.paths.processed_data_dir = str(self.test_processed_dir)
             mock_config.geophysical_data.coordinate_systems = {

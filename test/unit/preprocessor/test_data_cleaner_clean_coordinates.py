@@ -19,7 +19,7 @@ from unittest.mock import patch, MagicMock
 # Ajouter le répertoire parent au path Python
 sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
 
-from src.preprocessor.data_cleaner import GeophysicalDataCleaner
+from backend.preprocessor.data_cleaner import GeophysicalDataCleaner
 
 
 class TestDataCleanerCleanCoordinates(unittest.TestCase):
@@ -33,7 +33,7 @@ class TestDataCleanerCleanCoordinates(unittest.TestCase):
         self.test_dir = self.project_root / "test" / "fixtures"
         
         # Créer une instance du cleaner avec les vrais chemins
-        with patch('src.preprocessor.data_cleaner.CONFIG') as mock_config:
+        with patch('backend.preprocessor.data_cleaner.CONFIG') as mock_config:
             mock_config.paths.raw_data_dir = str(self.raw_data_dir)
             mock_config.paths.processed_data_dir = str(self.test_dir / "processed")
             mock_config.geophysical_data.coordinate_systems = {
@@ -59,7 +59,7 @@ class TestDataCleanerCleanCoordinates(unittest.TestCase):
         pd_file = self.raw_data_dir / "PD.csv"
         self.assertTrue(pd_file.exists(), f"Le fichier {pd_file} n'existe pas")
         
-        df_pd = pd.read_csv(pd_file, sep=';')
+        df_pd = pd.read_csv(pd_file, sep=',')
         self.assertIsInstance(df_pd, pd.DataFrame)
         self.assertGreater(len(df_pd), 0, "PD.csv ne devrait pas être vide")
         
@@ -100,12 +100,12 @@ class TestDataCleanerCleanCoordinates(unittest.TestCase):
         s_file = self.raw_data_dir / "S.csv"
         self.assertTrue(s_file.exists(), f"Le fichier {s_file} n'existe pas")
         
-        df_s = pd.read_csv(s_file, sep=';')
+        df_s = pd.read_csv(s_file, sep=',')
         self.assertIsInstance(df_s, pd.DataFrame)
         self.assertGreater(len(df_s), 0, "S.csv ne devrait pas être vide")
         
         # Vérifier que les colonnes de coordonnées sont présentes
-        coord_cols = ['LAT', 'LON']
+        coord_cols = ['x', 'y', 'z']
         for col in coord_cols:
             self.assertIn(col, df_s.columns, f"Colonne {col} manquante dans S.csv")
         
@@ -139,12 +139,12 @@ class TestDataCleanerCleanCoordinates(unittest.TestCase):
         """Test de nettoyage des coordonnées des deux fichiers CSV ensemble"""
         # Tester PD.csv
         pd_file = self.raw_data_dir / "PD.csv"
-        df_pd = pd.read_csv(pd_file, sep=';')
+        df_pd = pd.read_csv(pd_file, sep=',')
         cleaned_pd = self.cleaner._clean_coordinates(df_pd, "pole_dipole")
         
         # Tester S.csv
         s_file = self.raw_data_dir / "S.csv"
-        df_s = pd.read_csv(s_file, sep=';')
+        df_s = pd.read_csv(s_file, sep=',')
         cleaned_s = self.cleaner._clean_coordinates(df_s, "schlumberger")
         
         # Vérifier que les deux nettoyages ont réussi
@@ -328,7 +328,7 @@ class TestDataCleanerCleanCoordinates(unittest.TestCase):
         
         # Tester PD.csv
         pd_file = self.raw_data_dir / "PD.csv"
-        df_pd = pd.read_csv(pd_file, sep=';')
+        df_pd = pd.read_csv(pd_file, sep=',')
         
         start_time = time.time()
         cleaned_pd = self.cleaner._clean_coordinates(df_pd, "pole_dipole")
@@ -339,7 +339,7 @@ class TestDataCleanerCleanCoordinates(unittest.TestCase):
         
         # Tester S.csv
         s_file = self.raw_data_dir / "S.csv"
-        df_s = pd.read_csv(s_file, sep=';')
+        df_s = pd.read_csv(s_file, sep=',')
         
         start_time = time.time()
         cleaned_s = self.cleaner._clean_coordinates(df_s, "schlumberger")

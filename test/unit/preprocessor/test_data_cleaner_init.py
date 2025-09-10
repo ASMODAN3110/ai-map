@@ -2,49 +2,186 @@
 """
 Test unitaire pour la fonction __init__ de GeophysicalDataCleaner
 
-Ce test vérifie que l'initialisation de la classe fonctionne correctement.
+Ce test vérifie que l'initialisation de la classe fonctionne correctement
+avec des données réelles (PD.csv, S.csv) et des chemins réels.
 """
 
 import sys
 import unittest
+import pandas as pd
 from pathlib import Path
 from unittest.mock import patch, MagicMock
 
 # Ajouter le répertoire parent au path Python
 sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
 
-from src.preprocessor.data_cleaner import GeophysicalDataCleaner
+from backend.preprocessor.data_cleaner import GeophysicalDataCleaner
 
 
 class TestGeophysicalDataCleanerInit(unittest.TestCase):
-    """Tests pour la fonction __init__ de GeophysicalDataCleaner"""
+    """Tests pour la fonction __init__ de GeophysicalDataCleaner avec données réelles"""
     
     def setUp(self):
-        """Configuration avant chaque test"""
-        # Utiliser le dossier fixtures existant (ne pas le recréer)
-        self.test_data_dir = Path(__file__).parent.parent.parent.parent / "test" / "fixtures"
+        """Configuration avant chaque test avec données réelles"""
+        # Utiliser les vrais fichiers de données du projet
+        self.project_root = Path(__file__).parent.parent.parent.parent
+        self.raw_data_dir = self.project_root / "data" / "raw"
+        self.test_dir = self.project_root / "test" / "fixtures"
         
-        # Créer seulement le dossier processed s'il n'existe pas
-        self.test_processed_dir = self.test_data_dir / "processed"
-        self.test_processed_dir.mkdir(exist_ok=True)
+        # Vérifier que les fichiers de données réels existent
+        self.pd_file = self.raw_data_dir / "PD.csv"
+        self.s_file = self.raw_data_dir / "S.csv"
+        
+        # Créer le dossier processed s'il n'existe pas
+        (self.test_dir / "processed").mkdir(exist_ok=True)
     
     def tearDown(self):
         """Nettoyage après chaque test"""
         # Ne supprimer QUE le dossier processed temporaire, PAS le dossier fixtures
         import shutil
-        if self.test_processed_dir.exists():
-            shutil.rmtree(self.test_processed_dir)
+        processed_dir = self.test_dir / "processed"
+        if processed_dir.exists():
+            shutil.rmtree(processed_dir)
     
     def test_import_class(self):
         """Test que la classe peut être importée"""
         self.assertIsNotNone(GeophysicalDataCleaner)
         self.assertTrue(hasattr(GeophysicalDataCleaner, '__init__'))
     
-    def test_create_instance(self):
-        """Test de création d'instance"""
-        cleaner = GeophysicalDataCleaner()
-        self.assertIsInstance(cleaner, GeophysicalDataCleaner)
-        self.assertIsNotNone(cleaner)
+    def test_create_instance_with_real_data_paths(self):
+        """Test de création d'instance avec des chemins de données réels"""
+        # Créer une instance du cleaner avec les vrais chemins
+        with patch('backend.preprocessor.data_cleaner.CONFIG') as mock_config:
+            mock_config.paths.raw_data_dir = str(self.raw_data_dir)
+            mock_config.paths.processed_data_dir = str(self.test_dir / "processed")
+            mock_config.geophysical_data.coordinate_systems = {
+                'wgs84': "EPSG:4326",
+                'utm_proj': "EPSG:32630"
+            }
+            mock_config.geophysical_data.required_columns = [
+                'x', 'y', 'z', 'Rho(ohm.m)', 'M (mV/V)', 'LAT', 'LON', 'El-array'
+            ]
+            mock_config.geophysical_data.devices = {
+                'pole_dipole': {'coverage': 1000},
+                'schlumberger': {'coverage': 1000}
+            }
+            
+            cleaner = GeophysicalDataCleaner()
+            
+            # Vérifications
+            self.assertIsInstance(cleaner, GeophysicalDataCleaner)
+            self.assertIsNotNone(cleaner)
+            self.assertEqual(cleaner.raw_data_dir, self.raw_data_dir)
+            self.assertEqual(cleaner.processed_data_dir, self.test_dir / "processed")
+            
+            print(f"✅ Instance créée avec chemins réels: {cleaner.raw_data_dir}")
+    
+    def test_initialization_with_real_csv_files(self):
+        """Test d'initialisation avec vérification des fichiers CSV réels"""
+        # Vérifier que les fichiers de données réels existent
+        self.assertTrue(self.pd_file.exists(), f"Fichier PD.csv manquant: {self.pd_file}")
+        self.assertTrue(self.s_file.exists(), f"Fichier S.csv manquant: {self.s_file}")
+        
+        # Créer une instance du cleaner avec les vrais chemins
+        with patch('backend.preprocessor.data_cleaner.CONFIG') as mock_config:
+            mock_config.paths.raw_data_dir = str(self.raw_data_dir)
+            mock_config.paths.processed_data_dir = str(self.test_dir / "processed")
+            mock_config.geophysical_data.coordinate_systems = {
+                'wgs84': "EPSG:4326",
+                'utm_proj': "EPSG:32630"
+            }
+            mock_config.geophysical_data.required_columns = [
+                'x', 'y', 'z', 'Rho(ohm.m)', 'M (mV/V)', 'LAT', 'LON', 'El-array'
+            ]
+            mock_config.geophysical_data.devices = {
+                'pole_dipole': {'coverage': 1000},
+                'schlumberger': {'coverage': 1000}
+            }
+            
+            cleaner = GeophysicalDataCleaner()
+            
+            # Vérifier que les fichiers peuvent être lus
+            pd_df = pd.read_csv(self.pd_file, sep=';')
+            s_df = pd.read_csv(self.s_file, sep=';')
+            
+            self.assertGreater(len(pd_df), 0, "PD.csv ne devrait pas être vide")
+            self.assertGreater(len(s_df), 0, "S.csv ne devrait pas être vide")
+            
+            print(f"✅ Fichiers réels vérifiés: PD.csv ({len(pd_df)} lignes), S.csv ({len(s_df)} lignes)")
+    
+    def test_supported_devices_initialization(self):
+        """Test d'initialisation des dispositifs supportés avec données réelles"""
+        with patch('backend.preprocessor.data_cleaner.CONFIG') as mock_config:
+            mock_config.paths.raw_data_dir = str(self.raw_data_dir)
+            mock_config.paths.processed_data_dir = str(self.test_dir / "processed")
+            mock_config.geophysical_data.coordinate_systems = {
+                'wgs84': "EPSG:4326",
+                'utm_proj': "EPSG:32630"
+            }
+            mock_config.geophysical_data.required_columns = [
+                'x', 'y', 'z', 'Rho(ohm.m)', 'M (mV/V)', 'LAT', 'LON', 'El-array'
+            ]
+            mock_config.geophysical_data.devices = {
+                'pole_dipole': {'coverage': 1000},
+                'schlumberger': {'coverage': 1000}
+            }
+            
+            cleaner = GeophysicalDataCleaner()
+            
+            # Vérifier les dispositifs supportés
+            self.assertIn('pole_dipole', cleaner.supported_devices)
+            self.assertIn('schlumberger', cleaner.supported_devices)
+            self.assertEqual(len(cleaner.supported_devices), 2)
+            
+            # Vérifier les informations des dispositifs
+            pd_info = cleaner.supported_devices['pole_dipole']
+            self.assertEqual(pd_info['name'], 'Pole-Dipole')
+            self.assertIn('electrodes', pd_info)
+            self.assertIn('measurements', pd_info)
+            
+            schl_info = cleaner.supported_devices['schlumberger']
+            self.assertEqual(schl_info['name'], 'Schlumberger')
+            self.assertIn('electrodes', schl_info)
+            self.assertIn('measurements', schl_info)
+            
+            print(f"✅ Dispositifs supportés initialisés: {list(cleaner.supported_devices.keys())}")
+    
+    def test_generator_config_initialization(self):
+        """Test d'initialisation de la configuration des générateurs"""
+        with patch('backend.preprocessor.data_cleaner.CONFIG') as mock_config:
+            mock_config.paths.raw_data_dir = str(self.raw_data_dir)
+            mock_config.paths.processed_data_dir = str(self.test_dir / "processed")
+            mock_config.geophysical_data.coordinate_systems = {
+                'wgs84': "EPSG:4326",
+                'utm_proj': "EPSG:32630"
+            }
+            mock_config.geophysical_data.required_columns = [
+                'x', 'y', 'z', 'Rho(ohm.m)', 'M (mV/V)', 'LAT', 'LON', 'El-array'
+            ]
+            mock_config.geophysical_data.devices = {
+                'pole_dipole': {'coverage': 1000},
+                'schlumberger': {'coverage': 1000}
+            }
+            
+            cleaner = GeophysicalDataCleaner()
+            
+            # Vérifier la configuration des générateurs
+            self.assertIn('unet_2d', cleaner.generator_config)
+            self.assertIn('voxnet_3d', cleaner.generator_config)
+            
+            # Vérifier la configuration U-Net 2D
+            unet_config = cleaner.generator_config['unet_2d']
+            self.assertEqual(unet_config['input_size'], (64, 64, 4))
+            self.assertEqual(unet_config['output_channels'], 2)
+            self.assertEqual(unet_config['spatial_resolution'], 1.0)
+            
+            # Vérifier la configuration VoxNet 3D
+            voxnet_config = cleaner.generator_config['voxnet_3d']
+            self.assertEqual(voxnet_config['input_size'], (32, 32, 32, 4))
+            self.assertEqual(voxnet_config['output_channels'], 1)
+            self.assertEqual(voxnet_config['spatial_resolution'], 2.0)
+            
+            print(f"✅ Configuration des générateurs initialisée: U-Net 2D et VoxNet 3D")
     
     def test_attributes_exist(self):
         """Test que tous les attributs requis existent"""
@@ -72,9 +209,9 @@ class TestGeophysicalDataCleanerInit(unittest.TestCase):
         """Test de l'attribut raw_data_dir"""
         cleaner = GeophysicalDataCleaner()
         self.assertIsInstance(cleaner.raw_data_dir, Path)
-        # Compatible Windows et Unix
-        raw_path_str = str(cleaner.raw_data_dir)
-        self.assertTrue(raw_path_str.endswith("data\\raw") or raw_path_str.endswith("data/raw") or "data/raw" in raw_path_str)
+        # Vérifier que le chemin existe et est un répertoire
+        self.assertTrue(cleaner.raw_data_dir.exists(), "Le répertoire raw_data_dir devrait exister")
+        self.assertTrue(cleaner.raw_data_dir.is_dir(), "raw_data_dir devrait être un répertoire")
     
     def test_processed_data_dir_attribute(self):
         """Test de l'attribut processed_data_dir"""
@@ -145,7 +282,9 @@ class TestGeophysicalDataCleanerInit(unittest.TestCase):
         # Méthodes publiques attendues
         expected_methods = [
             'clean_all_devices',
-            'get_cleaning_summary'
+            'prepare_data_for_generators',
+            'generate_synthetic_data_for_training',
+            'prepare_data_for_generators_from_df'
         ]
         
         for method in expected_methods:
@@ -179,16 +318,37 @@ class TestGeophysicalDataCleanerMethods(unittest.TestCase):
         for device_name, (clean_path, report) in results.items():
             self.assertIsInstance(clean_path, Path)
             self.assertIsInstance(report, dict)
-            self.assertIn('device', report)
-            self.assertEqual(report['device'], device_name)
+            # Vérifier les clés communes du rapport
+            self.assertIn('original_count', report)
+            self.assertIn('cleaned_count', report)
+            self.assertIn('removed_count', report)
     
-    def test_get_cleaning_summary_empty(self):
-        """Test de get_cleaning_summary avec aucun nettoyage"""
-        summary = self.cleaner.get_cleaning_summary()
+    def test_prepare_data_for_generators(self):
+        """Test de prepare_data_for_generators"""
+        # Créer un fichier CSV de test
+        test_file = Path("test_data.csv")
+        test_data = pd.DataFrame({
+            'x': [500000, 500100, 500200],
+            'y': [450000, 450100, 450200],
+            'z': [500, 510, 520],
+            'resistivity': [100, 150, 200],
+            'chargeability': [10, 15, 20]
+        })
+        test_data.to_csv(test_file, index=False)
         
-        # Devrait retourner un dictionnaire vide au début
-        self.assertIsInstance(summary, dict)
-        self.assertEqual(len(summary), 0)
+        try:
+            # Tester la méthode
+            result = self.cleaner.prepare_data_for_generators(test_file, "pole_dipole")
+            
+            # Vérifications
+            self.assertIsInstance(result, dict)
+            self.assertIn('unet_2d', result)
+            self.assertIn('voxnet_3d', result)
+            self.assertIn('metadata', result)
+        finally:
+            # Nettoyer
+            if test_file.exists():
+                test_file.unlink()
     
     def test_methods_return_types(self):
         """Test des types de retour des méthodes"""
@@ -196,9 +356,9 @@ class TestGeophysicalDataCleanerMethods(unittest.TestCase):
         results = self.cleaner.clean_all_devices()
         self.assertIsInstance(results, dict)
         
-        # get_cleaning_summary
-        summary = self.cleaner.get_cleaning_summary()
-        self.assertIsInstance(summary, dict)
+        # generate_synthetic_data_for_training
+        synthetic_data = self.cleaner.generate_synthetic_data_for_training(10, "pole_dipole")
+        self.assertIsInstance(synthetic_data, dict)
 
 
 if __name__ == "__main__":

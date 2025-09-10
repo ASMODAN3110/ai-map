@@ -85,11 +85,11 @@ class TestMainIntegration(unittest.TestCase):
         mock_config.paths.raw_data_dir = self.raw_data_dir
         
         # Mock de toutes les dépendances
-        with patch('src.preprocessor.data_cleaner.GeophysicalDataCleaner') as mock_cleaner_class, \
-             patch('src.data.data_processor.GeophysicalDataProcessor') as mock_processor_class, \
-             patch('src.preprocessor.data_augmenter.GeophysicalDataAugmenter') as mock_augmenter_class, \
-             patch('src.model.geophysical_trainer.GeophysicalTrainer') as mock_trainer_class, \
-             patch('src.model.geophysical_trainer.GeophysicalCNN2D') as mock_cnn_class:
+        with patch('backend.preprocessor.data_cleaner.GeophysicalDataCleaner') as mock_cleaner_class, \
+             patch('backend.data.data_processor.GeophysicalDataProcessor') as mock_processor_class, \
+             patch('backend.preprocessor.data_augmenter.GeophysicalDataAugmenter') as mock_augmenter_class, \
+             patch('backend.model.geophysical_trainer.GeophysicalTrainer') as mock_trainer_class, \
+             patch('backend.model.geophysical_trainer.GeophysicalCNN2D') as mock_cnn_class:
             
             # Configuration des mocks
             mock_cleaner = Mock()
@@ -157,11 +157,11 @@ class TestMainIntegration(unittest.TestCase):
         ]
         
         # Mock de toutes les dépendances
-        with patch('src.preprocessor.data_cleaner.GeophysicalDataCleaner') as mock_cleaner_class, \
-             patch('src.data.data_processor.GeophysicalDataProcessor') as mock_processor_class, \
-             patch('src.preprocessor.data_augmenter.GeophysicalDataAugmenter') as mock_augmenter_class, \
-             patch('src.model.geophysical_trainer.GeophysicalTrainer') as mock_trainer_class, \
-             patch('src.model.geophysical_trainer.GeophysicalCNN2D') as mock_cnn_class:
+        with patch('backend.preprocessor.data_cleaner.GeophysicalDataCleaner') as mock_cleaner_class, \
+             patch('backend.data.data_processor.GeophysicalDataProcessor') as mock_processor_class, \
+             patch('backend.preprocessor.data_augmenter.GeophysicalDataAugmenter') as mock_augmenter_class, \
+             patch('backend.model.geophysical_trainer.GeophysicalTrainer') as mock_trainer_class, \
+             patch('backend.model.geophysical_trainer.GeophysicalCNN2D') as mock_cnn_class:
             
             # Configuration des mocks
             mock_cleaner = Mock()
@@ -222,10 +222,10 @@ class TestMainIntegration(unittest.TestCase):
         ]
         
         # Mock de toutes les dépendances
-        with patch('src.preprocessor.data_cleaner.GeophysicalDataCleaner') as mock_cleaner_class, \
-             patch('src.data.data_processor.GeophysicalDataProcessor') as mock_processor_class, \
-             patch('src.preprocessor.data_augmenter.GeophysicalDataAugmenter') as mock_augmenter_class, \
-             patch('src.model.geophysical_trainer.GeophysicalTrainer') as mock_trainer_class:
+        with patch('backend.preprocessor.data_cleaner.GeophysicalDataCleaner') as mock_cleaner_class, \
+             patch('backend.data.data_processor.GeophysicalDataProcessor') as mock_processor_class, \
+             patch('backend.preprocessor.data_augmenter.GeophysicalDataAugmenter') as mock_augmenter_class, \
+             patch('backend.model.geophysical_trainer.GeophysicalTrainer') as mock_trainer_class:
             
             # Configuration des mocks
             mock_cleaner = Mock()
@@ -272,12 +272,12 @@ class TestMainIntegration(unittest.TestCase):
         ]
         
         # Mock de toutes les dépendances
-        with patch('src.preprocessor.data_cleaner.GeophysicalDataCleaner') as mock_cleaner_class, \
-             patch('src.data.data_processor.GeophysicalDataProcessor') as mock_processor_class, \
-             patch('src.preprocessor.data_augmenter.GeophysicalDataAugmenter') as mock_augmenter_class, \
-             patch('src.model.geophysical_trainer.GeophysicalTrainer') as mock_trainer_class, \
-             patch('src.model.geophysical_image_trainer.GeophysicalImageTrainer') as mock_image_trainer_class, \
-             patch('src.model.geophysical_hybrid_net.GeophysicalHybridNet') as mock_hybrid_class, \
+        with patch('backend.preprocessor.data_cleaner.GeophysicalDataCleaner') as mock_cleaner_class, \
+             patch('backend.data.data_processor.GeophysicalDataProcessor') as mock_processor_class, \
+             patch('backend.preprocessor.data_augmenter.GeophysicalDataAugmenter') as mock_augmenter_class, \
+             patch('backend.model.geophysical_trainer.GeophysicalTrainer') as mock_trainer_class, \
+             patch('backend.model.geophysical_image_trainer.GeophysicalImageTrainer') as mock_image_trainer_class, \
+             patch('backend.model.geophysical_hybrid_net.GeophysicalHybridNet') as mock_hybrid_class, \
              patch('main.torch.save') as mock_torch_save:
             
             # Configuration des mocks
@@ -343,11 +343,11 @@ class TestMainIntegration(unittest.TestCase):
         ]
         
         # Mock de toutes les dépendances
-        with patch('src.preprocessor.data_cleaner.GeophysicalDataCleaner') as mock_cleaner_class, \
-             patch('src.data.data_processor.GeophysicalDataProcessor') as mock_processor_class, \
-             patch('src.preprocessor.data_augmenter.GeophysicalDataAugmenter') as mock_augmenter_class, \
-             patch('src.model.geophysical_trainer.GeophysicalTrainer') as mock_trainer_class, \
-             patch('src.model.geophysical_trainer.GeophysicalDataFrameNet') as mock_dataframe_class:
+        with patch('backend.preprocessor.data_cleaner.GeophysicalDataCleaner') as mock_cleaner_class, \
+             patch('backend.data.data_processor.GeophysicalDataProcessor') as mock_processor_class, \
+             patch('backend.preprocessor.data_augmenter.GeophysicalDataAugmenter') as mock_augmenter_class, \
+             patch('backend.model.geophysical_trainer.GeophysicalTrainer') as mock_trainer_class, \
+             patch('backend.model.geophysical_trainer.GeophysicalDataFrameNet') as mock_dataframe_class:
             
             # Configuration des mocks
             mock_cleaner = Mock()
@@ -409,11 +409,11 @@ class TestMainIntegration(unittest.TestCase):
         ]
         
         # Mock de toutes les dépendances
-        with patch('src.preprocessor.data_cleaner.GeophysicalDataCleaner') as mock_cleaner_class, \
-             patch('src.data.data_processor.GeophysicalDataProcessor') as mock_processor_class, \
-             patch('src.preprocessor.data_augmenter.GeophysicalDataAugmenter') as mock_augmenter_class, \
-             patch('src.model.geophysical_trainer.GeophysicalTrainer') as mock_trainer_class, \
-             patch('src.model.geophysical_trainer.GeophysicalCNN3D') as mock_cnn_class:
+        with patch('backend.preprocessor.data_cleaner.GeophysicalDataCleaner') as mock_cleaner_class, \
+             patch('backend.data.data_processor.GeophysicalDataProcessor') as mock_processor_class, \
+             patch('backend.preprocessor.data_augmenter.GeophysicalDataAugmenter') as mock_augmenter_class, \
+             patch('backend.model.geophysical_trainer.GeophysicalTrainer') as mock_trainer_class, \
+             patch('backend.model.geophysical_trainer.GeophysicalCNN3D') as mock_cnn_class:
             
             # Configuration des mocks
             mock_cleaner = Mock()

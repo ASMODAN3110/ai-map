@@ -57,7 +57,7 @@ class TestMainPipeline(unittest.TestCase):
     
     @patch('main.CONFIG', new_callable=Mock)
     @patch('main.logger')
-    @patch('src.preprocessor.data_cleaner.GeophysicalDataCleaner')
+    @patch('backend.preprocessor.data_cleaner.GeophysicalDataCleaner')
     def test_phase1_data_cleaning_success(self, mock_cleaner_class, mock_logger, mock_config):
         """Test de la phase 1 de nettoyage des données avec succès"""
         # Configuration des mocks
@@ -84,7 +84,7 @@ class TestMainPipeline(unittest.TestCase):
     
     @patch('main.CONFIG', new_callable=Mock)
     @patch('main.logger')
-    @patch('src.data.data_processor.GeophysicalDataProcessor')
+    @patch('backend.data.data_processor.GeophysicalDataProcessor')
     def test_phase2_data_processing_success(self, mock_processor_class, mock_logger, mock_config):
         """Test de la phase 2 de traitement des données avec succès"""
         # Configuration des mocks
@@ -104,7 +104,7 @@ class TestMainPipeline(unittest.TestCase):
     
     @patch('main.CONFIG', new_callable=Mock)
     @patch('main.logger')
-    @patch('src.data.data_processor.GeophysicalDataProcessor')
+    @patch('backend.data.data_processor.GeophysicalDataProcessor')
     def test_phase2_data_processing_no_data(self, mock_processor_class, mock_logger, mock_config):
         """Test de la phase 2 avec aucune donnée valide"""
         # Configuration des mocks
@@ -150,8 +150,8 @@ class TestMainPipeline(unittest.TestCase):
     
     @patch('main.CONFIG', new_callable=Mock)
     @patch('main.logger')
-    @patch('src.preprocessor.data_augmenter.GeophysicalDataAugmenter')
-    @patch('src.model.geophysical_trainer.GeophysicalTrainer')
+    @patch('backend.preprocessor.data_augmenter.GeophysicalDataAugmenter')
+    @patch('backend.model.geophysical_trainer.GeophysicalTrainer')
     def test_phase4_model_training_cnn_2d(self, mock_trainer_class, mock_augmenter_class, 
                                         mock_logger, mock_config):
         """Test de la phase 4 d'entraînement avec modèle CNN 2D"""
@@ -206,8 +206,8 @@ class TestMainPipeline(unittest.TestCase):
     
     @patch('main.CONFIG', new_callable=Mock)
     @patch('main.logger')
-    @patch('src.preprocessor.data_augmenter.GeophysicalDataAugmenter')
-    @patch('src.model.geophysical_trainer.GeophysicalTrainer')
+    @patch('backend.preprocessor.data_augmenter.GeophysicalDataAugmenter')
+    @patch('backend.model.geophysical_trainer.GeophysicalTrainer')
     def test_phase4_model_training_invalid_model(self, mock_trainer_class, mock_augmenter_class, 
                                                 mock_logger, mock_config):
         """Test de la phase 4 avec un type de modèle invalide"""
@@ -263,8 +263,8 @@ class TestMainPipeline(unittest.TestCase):
     
     @patch('main.CONFIG', new_callable=Mock)
     @patch('main.logger')
-    @patch('src.preprocessor.data_augmenter.GeophysicalDataAugmenter')
-    @patch('src.model.geophysical_trainer.GeophysicalTrainer')
+    @patch('backend.preprocessor.data_augmenter.GeophysicalDataAugmenter')
+    @patch('backend.model.geophysical_trainer.GeophysicalTrainer')
     def test_train_cnn_2d(self, mock_trainer_class, mock_augmenter_class, 
                          mock_logger, mock_config):
         """Test de la fonction train_cnn_2d"""
@@ -297,7 +297,7 @@ class TestMainPipeline(unittest.TestCase):
         }
         
         # Exécution
-        with patch('src.model.geophysical_trainer.GeophysicalCNN2D') as mock_cnn_class:
+        with patch('backend.model.geophysical_trainer.GeophysicalCNN2D') as mock_cnn_class:
             mock_model = Mock()
             mock_cnn_class.return_value = mock_model
             
@@ -314,8 +314,8 @@ class TestMainPipeline(unittest.TestCase):
     
     @patch('main.CONFIG', new_callable=Mock)
     @patch('main.logger')
-    @patch('src.preprocessor.data_augmenter.GeophysicalDataAugmenter')
-    @patch('src.model.geophysical_trainer.GeophysicalTrainer')
+    @patch('backend.preprocessor.data_augmenter.GeophysicalDataAugmenter')
+    @patch('backend.model.geophysical_trainer.GeophysicalTrainer')
     def test_train_cnn_3d(self, mock_trainer_class, mock_augmenter_class, 
                          mock_logger, mock_config):
         """Test de la fonction train_cnn_3d"""
@@ -347,7 +347,7 @@ class TestMainPipeline(unittest.TestCase):
         }
         
         # Exécution
-        with patch('src.model.geophysical_trainer.GeophysicalCNN3D') as mock_cnn_class:
+        with patch('backend.model.geophysical_trainer.GeophysicalCNN3D') as mock_cnn_class:
             mock_model = Mock()
             mock_cnn_class.return_value = mock_model
             
@@ -364,8 +364,8 @@ class TestMainPipeline(unittest.TestCase):
     
     @patch('main.CONFIG', new_callable=Mock)
     @patch('main.logger')
-    @patch('src.preprocessor.data_augmenter.GeophysicalDataAugmenter')
-    @patch('src.model.geophysical_trainer.GeophysicalTrainer')
+    @patch('backend.preprocessor.data_augmenter.GeophysicalDataAugmenter')
+    @patch('backend.model.geophysical_trainer.GeophysicalTrainer')
     def test_train_cnn_3d_no_volume(self, mock_trainer_class, mock_augmenter_class, 
                                    mock_logger, mock_config):
         """Test de la fonction train_cnn_3d sans volume 3D"""
@@ -389,7 +389,7 @@ class TestMainPipeline(unittest.TestCase):
         mock_trainer.train_model.return_value = {}
         
         # Exécution
-        with patch('src.model.geophysical_trainer.GeophysicalCNN3D') as mock_cnn_class:
+        with patch('backend.model.geophysical_trainer.GeophysicalCNN3D') as mock_cnn_class:
             mock_model = Mock()
             mock_cnn_class.return_value = mock_model
             
@@ -401,8 +401,8 @@ class TestMainPipeline(unittest.TestCase):
     
     @patch('main.CONFIG', new_callable=Mock)
     @patch('main.logger')
-    @patch('src.preprocessor.data_augmenter.GeophysicalDataAugmenter')
-    @patch('src.model.geophysical_trainer.GeophysicalTrainer')
+    @patch('backend.preprocessor.data_augmenter.GeophysicalDataAugmenter')
+    @patch('backend.model.geophysical_trainer.GeophysicalTrainer')
     def test_train_hybrid_model(self, mock_trainer_class, mock_augmenter_class, 
                                mock_logger, mock_config):
         """Test de la fonction train_hybrid_model"""
@@ -434,8 +434,8 @@ class TestMainPipeline(unittest.TestCase):
         }
         
         # Exécution
-        with patch('src.model.geophysical_image_trainer.GeophysicalImageTrainer') as mock_image_trainer_class, \
-             patch('src.model.geophysical_hybrid_net.GeophysicalHybridNet') as mock_hybrid_class, \
+        with patch('backend.model.geophysical_image_trainer.GeophysicalImageTrainer') as mock_image_trainer_class, \
+             patch('backend.model.geophysical_hybrid_net.GeophysicalHybridNet') as mock_hybrid_class, \
              patch('main.torch.save') as mock_torch_save:
             
             mock_image_trainer_class.return_value = mock_hybrid_trainer
@@ -455,8 +455,8 @@ class TestMainPipeline(unittest.TestCase):
     
     @patch('main.CONFIG', new_callable=Mock)
     @patch('main.logger')
-    @patch('src.preprocessor.data_augmenter.GeophysicalDataAugmenter')
-    @patch('src.model.geophysical_trainer.GeophysicalTrainer')
+    @patch('backend.preprocessor.data_augmenter.GeophysicalDataAugmenter')
+    @patch('backend.model.geophysical_trainer.GeophysicalTrainer')
     def test_train_dataframe_model(self, mock_trainer_class, mock_augmenter_class, 
                                   mock_logger, mock_config):
         """Test de la fonction train_dataframe_model"""
@@ -486,7 +486,7 @@ class TestMainPipeline(unittest.TestCase):
         }
         
         # Exécution
-        with patch('src.model.geophysical_trainer.GeophysicalDataFrameNet') as mock_dataframe_class:
+        with patch('backend.model.geophysical_trainer.GeophysicalDataFrameNet') as mock_dataframe_class:
             mock_model = Mock()
             mock_dataframe_class.return_value = mock_model
             

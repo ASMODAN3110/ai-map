@@ -22,9 +22,9 @@ current_dir = Path(__file__).resolve().parent
 project_root = current_dir.parent.parent
 sys.path.insert(0, str(project_root))
 
-from src.model.geophysical_trainer import GeophysicalTrainer, GeophysicalDataFrameNet
-from src.preprocessor.data_augmenter import GeophysicalDataAugmenter
-from src.utils.logger import logger
+from backend.model.geophysical_trainer import GeophysicalTrainer, GeophysicalDataFrameNet
+from backend.preprocessor.data_augmenter import GeophysicalDataAugmenter
+from backend.utils.logger import logger
 
 # Ignorer les warnings pour les tests
 warnings.filterwarnings("ignore")

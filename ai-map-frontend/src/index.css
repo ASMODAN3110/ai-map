@@ -1,0 +1,91 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Géophysique Theme - Couleurs professionnelles pour l'analyse géophysique */
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 200.5 78% 31.4%; /* Bleu géophysique */
+    --primary-foreground: 210 40% 98%;
+    --secondary: 127.4 14.9% 75.6%; /* Vert scientifique */
+    --secondary-foreground: 222.2 84% 4.9%;
+    --muted: 210 40% 98%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 27.325 24.5% 57.7%; /* Orange de données */
+    --accent-foreground: 222.2 84% 4.9%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 200.5 78% 31.4%;
+    --radius: 0.5rem;
+    --chart-1: 142.5 13.1% 50.2%;
+    --chart-2: 27.325 24.5% 57.7%;
+    --chart-3: 200.5 78% 31.4%;
+    --chart-4: 127.4 14.9% 75.6%;
+    --chart-5: 85.87 19.1% 69.6%;
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 200.5 78% 31.4%;
+    --primary-foreground: 222.2 84% 4.9%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 27.325 24.5% 57.7%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 200.5 78% 31.4%;
+    --chart-1: 142.5 13.1% 50.2%;
+    --chart-2: 27.325 24.5% 57.7%;
+    --chart-3: 200.5 78% 31.4%;
+    --chart-4: 127.4 14.9% 75.6%;
+    --chart-5: 85.87 19.1% 69.6%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* Styles personnalisés pour l'interface géophysique */
+.geophysical-gradient {
+  background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--secondary)) 100%);
+}
+
+.data-visualization {
+  background: linear-gradient(45deg, hsl(var(--chart-1)) 0%, hsl(var(--chart-2)) 50%, hsl(var(--chart-3)) 100%);
+}
+
+.analysis-card {
+  @apply bg-card border border-border rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200;
+}
+
+.upload-zone {
+  @apply border-2 border-dashed border-border rounded-lg p-8 text-center hover:border-primary/50 transition-colors cursor-pointer;
+}
+
+.upload-zone.dragover {
+  @apply border-primary bg-primary/5;
+}

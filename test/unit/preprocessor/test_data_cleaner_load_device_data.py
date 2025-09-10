@@ -18,7 +18,7 @@ from unittest.mock import patch, MagicMock
 # Ajouter le répertoire parent au path Python
 sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
 
-from src.preprocessor.data_cleaner import GeophysicalDataCleaner
+from backend.preprocessor.data_cleaner import GeophysicalDataCleaner
 
 
 class TestDataCleanerLoadDeviceData(unittest.TestCase):
@@ -32,7 +32,7 @@ class TestDataCleanerLoadDeviceData(unittest.TestCase):
         self.test_dir = self.project_root / "test" / "fixtures"
         
         # Créer une instance du cleaner avec les vrais chemins
-        with patch('src.preprocessor.data_cleaner.CONFIG') as mock_config:
+        with patch('backend.preprocessor.data_cleaner.CONFIG') as mock_config:
             mock_config.paths.raw_data_dir = str(self.raw_data_dir)
             mock_config.paths.processed_data_dir = str(self.test_dir / "processed")
             mock_config.geophysical_data.coordinate_systems = {
@@ -67,14 +67,14 @@ class TestDataCleanerLoadDeviceData(unittest.TestCase):
         self.assertIsInstance(df, pd.DataFrame)
         self.assertGreater(len(df), 0, "Le fichier PD.csv ne devrait pas être vide")
         
-        # Vérifier les colonnes attendues pour PD.csv
-        expected_columns = ['x', 'y', 'z', 'Rho(ohm.m)', 'M (mV/V)']
+        # Vérifier les colonnes attendues pour PD.csv (structure réelle)
+        expected_columns = ['x', 'y', 'z', 'resistivity', 'chargeability']
         for col in expected_columns:
             self.assertIn(col, df.columns, f"Colonne {col} manquante dans PD.csv")
         
         # Vérifier quelques données
         self.assertIsInstance(df.iloc[0]['x'], (int, float))
-        self.assertIsInstance(df.iloc[0]['Rho(ohm.m)'], (int, float))
+        self.assertIsInstance(df.iloc[0]['resistivity'], (int, float))
         
         print(f"✅ PD.csv lu correctement: {len(df)} lignes, {len(df.columns)} colonnes")
     
@@ -93,14 +93,14 @@ class TestDataCleanerLoadDeviceData(unittest.TestCase):
         self.assertIsInstance(df, pd.DataFrame)
         self.assertGreater(len(df), 0, "Le fichier S.csv ne devrait pas être vide")
         
-        # Vérifier les colonnes attendues pour S.csv
-        expected_columns = ['El-array', 'LAT', 'LON', 'Rho (Ohm.m)', 'M (mV/V)']
+        # Vérifier les colonnes attendues pour S.csv (structure réelle)
+        expected_columns = ['x', 'y', 'z', 'resistivity', 'chargeability']
         for col in expected_columns:
             self.assertIn(col, df.columns, f"Colonne {col} manquante dans S.csv")
         
         # Vérifier quelques données
-        self.assertIsInstance(df.iloc[0]['LAT'], (int, float))
-        self.assertIsInstance(df.iloc[0]['Rho (Ohm.m)'], (int, float))
+        self.assertIsInstance(df.iloc[0]['x'], (int, float))
+        self.assertIsInstance(df.iloc[0]['resistivity'], (int, float))
         
         print(f"✅ S.csv lu correctement: {len(df)} lignes, {len(df.columns)} colonnes")
     

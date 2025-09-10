@@ -1,0 +1,6 @@
+{
+  "method": "pole-dipole",
+  "num_samples": 3,
+  "num_pseudo_sections": 3,
+  "num_chargeability_maps": 3
+}
