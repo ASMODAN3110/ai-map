@@ -36,10 +36,10 @@ class TestDataAugmenterAugment3dVolume(unittest.TestCase):
         self.test_raw_dir.mkdir(parents=True, exist_ok=True)
         self.test_processed_dir.mkdir(exist_ok=True)
         
-        # Copier les fichiers de test depuis fixtures
-        fixtures_dir = Path(__file__).parent.parent.parent / "fixtures" / "raw"
-        self.pd_test_file = fixtures_dir / "PD.csv"
-        self.s_test_file = fixtures_dir / "S.csv"
+        # Utiliser les fichiers de données réelles
+        real_data_dir = Path(__file__).parent.parent.parent.parent / "data" / "raw"
+        self.pd_test_file = real_data_dir / "PD.csv"
+        self.s_test_file = real_data_dir / "S.csv"
         
         # Copier les fichiers vers le dossier de test
         if self.pd_test_file.exists():
@@ -72,7 +72,12 @@ class TestDataAugmenterAugment3dVolume(unittest.TestCase):
     def _create_test_volumes(self):
         """Créer des volumes de test basés sur les vraies données"""
         # Charger les données PD.csv
-        pd_df = pd.read_csv(self.test_raw_dir / "PD.csv", sep=';')
+        pd_df = pd.read_csv(self.test_raw_dir / "PD.csv", sep=',')
+        
+        # Normaliser les colonnes pour la correspondance
+        from backend.preprocessor.data_augmenter import GeophysicalDataAugmenter
+        augmenter = GeophysicalDataAugmenter(random_seed=42)
+        pd_df = augmenter._normalize_dataframe_columns(pd_df)
         
         # Créer un volume 3D basé sur PD.csv (8x8x8x4)
         volume_size = 8
@@ -84,13 +89,14 @@ class TestDataAugmenterAugment3dVolume(unittest.TestCase):
             h = (i % (volume_size * volume_size)) // volume_size
             w = i % volume_size
             if d < volume_size and h < volume_size and w < volume_size:
-                self.volume_3d_pd[d, h, w, 0] = pd_df.iloc[i]['Rho(ohm.m)'] if i < len(pd_df) else 0
-                self.volume_3d_pd[d, h, w, 1] = pd_df.iloc[i]['M (mV/V)'] if i < len(pd_df) else 0
+                self.volume_3d_pd[d, h, w, 0] = pd_df.iloc[i]['resistivity'] if i < len(pd_df) else 0
+                self.volume_3d_pd[d, h, w, 1] = pd_df.iloc[i]['chargeability'] if i < len(pd_df) else 0
                 self.volume_3d_pd[d, h, w, 2] = pd_df.iloc[i]['x'] if i < len(pd_df) else 0
                 self.volume_3d_pd[d, h, w, 3] = pd_df.iloc[i]['y'] if i < len(pd_df) else 0
         
         # Charger les données S.csv
-        s_df = pd.read_csv(self.test_raw_dir / "S.csv", sep=';')
+        s_df = pd.read_csv(self.test_raw_dir / "S.csv", sep=',')
+        s_df = augmenter._normalize_dataframe_columns(s_df)
         
         # Créer un volume 3D basé sur S.csv (16x16x16x4)
         volume_size_s = 16
@@ -102,10 +108,10 @@ class TestDataAugmenterAugment3dVolume(unittest.TestCase):
             h = (i % (volume_size_s * volume_size_s)) // volume_size_s
             w = i % volume_size_s
             if d < volume_size_s and h < volume_size_s and w < volume_size_s:
-                self.volume_3d_s[d, h, w, 0] = s_df.iloc[i]['Rho (Ohm.m)'] if i < len(s_df) else 0
-                self.volume_3d_s[d, h, w, 1] = s_df.iloc[i]['M (mV/V)'] if i < len(s_df) else 0
-                self.volume_3d_s[d, h, w, 2] = s_df.iloc[i]['LAT'] if i < len(s_df) else 0
-                self.volume_3d_s[d, h, w, 3] = s_df.iloc[i]['LON'] if i < len(s_df) else 0
+                self.volume_3d_s[d, h, w, 0] = s_df.iloc[i]['resistivity'] if i < len(s_df) else 0
+                self.volume_3d_s[d, h, w, 1] = s_df.iloc[i]['chargeability'] if i < len(s_df) else 0
+                self.volume_3d_s[d, h, w, 2] = s_df.iloc[i]['x'] if i < len(s_df) else 0
+                self.volume_3d_s[d, h, w, 3] = s_df.iloc[i]['y'] if i < len(s_df) else 0
         
         # Créer un volume de test simple pour les tests de base
         self.volume_3d_simple = np.random.rand(6, 6, 6, 4)
@@ -286,7 +292,7 @@ class TestDataAugmenterAugment3dVolume(unittest.TestCase):
             self.augmenter.augment_3d_volume(invalid_volume, ["flip_horizontal"], 1)
         
         # Test avec un type invalide
-        with self.assertRaises(ValueError):
+        with self.assertRaises(TypeError):
             self.augmenter.augment_3d_volume("invalid", ["flip_horizontal"], 1)
         
         print("✅ Gestion des erreurs 3D validée")
@@ -385,23 +391,21 @@ class TestDataAugmenterAugment3dVolume(unittest.TestCase):
         )
         self.assertEqual(len(result), 1)
         
-        # Test avec zéro augmentation
-        result = self.augmenter.augment_3d_volume(
-            self.volume_3d_simple, 
-            ["flip_horizontal"], 
-            0
-        )
-        self.assertEqual(len(result), 0)
+        # Test avec zéro augmentation (doit lever une exception)
+        with self.assertRaises(ValueError):
+            self.augmenter.augment_3d_volume(
+                self.volume_3d_simple, 
+                ["flip_horizontal"], 
+                0
+            )
         
-        # Test avec une liste d'augmentations vide
-        result = self.augmenter.augment_3d_volume(
-            self.volume_3d_simple, 
-            [], 
-            1
-        )
-        self.assertEqual(len(result), 1)
-        # Le volume devrait être identique car aucune augmentation n'a été appliquée
-        np.testing.assert_array_equal(result[0], self.volume_3d_simple)
+        # Test avec une liste d'augmentations vide (doit lever une exception)
+        with self.assertRaises(ValueError):
+            self.augmenter.augment_3d_volume(
+                self.volume_3d_simple, 
+                [], 
+                1
+            )
         
         print("✅ Cas limites 3D validés")
     

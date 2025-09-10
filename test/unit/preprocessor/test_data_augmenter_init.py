@@ -17,7 +17,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
 
 from backend.preprocessor.data_augmenter import GeophysicalDataAugmenter
 from backend.preprocessor.data_cleaner import GeophysicalDataCleaner
-from config import CONFIG
+from backend.config import CONFIG
 
 
 class TestDataAugmenterInit(unittest.TestCase):
@@ -87,7 +87,7 @@ class TestDataAugmenterInit(unittest.TestCase):
     def test_initialization_with_pd_csv_data(self):
         """Test de l'initialisation et utilisation avec les données PD.csv"""
         # Charger les données PD.csv
-        pd_df = pd.read_csv(self.pd_file, sep=';')
+        pd_df = pd.read_csv(self.pd_file, sep=',')
         print(f"📊 Données PD.csv chargées: {pd_df.shape}")
         
         # Initialiser l'augmenteur
@@ -118,7 +118,7 @@ class TestDataAugmenterInit(unittest.TestCase):
     def test_initialization_with_s_csv_data(self):
         """Test de l'initialisation et utilisation avec les données S.csv"""
         # Charger les données S.csv
-        s_df = pd.read_csv(self.s_file, sep=';')
+        s_df = pd.read_csv(self.s_file, sep=',')
         print(f"📊 Données S.csv chargées: {s_df.shape}")
         
         # Initialiser l'augmenteur
@@ -182,13 +182,17 @@ class TestDataAugmenterInit(unittest.TestCase):
     def test_initialization_with_grid_data(self):
         """Test de l'initialisation avec des données de grille"""
         # Créer des données de grille basées sur PD.csv
-        pd_df = pd.read_csv(self.pd_file, sep=';')
+        pd_df = pd.read_csv(self.pd_file, sep=',')
+        
+        # Normaliser les colonnes pour la correspondance
+        augmenter = GeophysicalDataAugmenter(random_seed=42)
+        pd_df = augmenter._normalize_dataframe_columns(pd_df)
         
         # Extraire les coordonnées et valeurs
         x_coords = pd_df['x'].values
         y_coords = pd_df['y'].values
-        resistivity = pd_df['Rho(ohm.m)'].values
-        chargeability = pd_df['M (mV/V)'].values
+        resistivity = pd_df['resistivity'].values
+        chargeability = pd_df['chargeability'].values
         
         # Créer une grille 2D simple (8x8x4)
         grid_size = 8
@@ -206,8 +210,7 @@ class TestDataAugmenterInit(unittest.TestCase):
         
         print(f"📊 Grille 2D créée: {grid_2d.shape}")
         
-        # Initialiser l'augmenteur
-        augmenter = GeophysicalDataAugmenter(random_seed=42)
+        # L'augmenteur est déjà initialisé ci-dessus
         
         # Tester l'augmentation avec la grille
         augmentations = ["rotation", "flip_horizontal", "gaussian_noise"]
@@ -227,10 +230,14 @@ class TestDataAugmenterInit(unittest.TestCase):
     def test_initialization_with_volume_data(self):
         """Test de l'initialisation avec des données de volume 3D"""
         # Créer un volume 3D basé sur S.csv
-        s_df = pd.read_csv(self.s_file, sep=';')
+        s_df = pd.read_csv(self.s_file, sep=',')
+        
+        # Normaliser les colonnes pour la correspondance
+        augmenter = GeophysicalDataAugmenter(random_seed=123)
+        s_df = augmenter._normalize_dataframe_columns(s_df)
         
         # Extraire les valeurs de résistivité
-        resistivity = s_df['Rho (Ohm.m)'].values
+        resistivity = s_df['resistivity'].values
         
         # Créer un volume 3D simple (8x8x8x4)
         volume_size = 8
@@ -249,8 +256,7 @@ class TestDataAugmenterInit(unittest.TestCase):
         
         print(f"📊 Volume 3D créé: {volume_3d.shape}")
         
-        # Initialiser l'augmenteur
-        augmenter = GeophysicalDataAugmenter(random_seed=123)
+        # L'augmenteur est déjà initialisé ci-dessus
         
         # Tester l'augmentation avec le volume
         augmentations = ["rotation", "flip_horizontal", "gaussian_noise"]
@@ -316,8 +322,8 @@ class TestDataAugmenterInit(unittest.TestCase):
     def test_initialization_integration(self):
         """Test d'intégration de l'initialisation avec le pipeline complet"""
         # Charger les données
-        pd_df = pd.read_csv(self.pd_file, sep=';')
-        s_df = pd.read_csv(self.s_file, sep=';')
+        pd_df = pd.read_csv(self.pd_file, sep=',')
+        s_df = pd.read_csv(self.s_file, sep=',')
         
         # Initialiser l'augmenteur
         augmenter = GeophysicalDataAugmenter(random_seed=42)
@@ -327,7 +333,8 @@ class TestDataAugmenterInit(unittest.TestCase):
         
         # Test DataFrame PD.csv
         try:
-            augmented_pd = augmenter.augment_dataframe(pd_df, ["gaussian_noise"], 1)
+            pd_df_normalized = augmenter._normalize_dataframe_columns(pd_df)
+            augmented_pd = augmenter.augment_dataframe(pd_df_normalized, ["gaussian_noise"], 1)
             test_results['PD_DataFrame'] = len(augmented_pd) > 0
         except Exception as e:
             test_results['PD_DataFrame'] = False
@@ -335,7 +342,8 @@ class TestDataAugmenterInit(unittest.TestCase):
         
         # Test DataFrame S.csv
         try:
-            augmented_s = augmenter.augment_dataframe(s_df, ["value_variation"], 1)
+            s_df_normalized = augmenter._normalize_dataframe_columns(s_df)
+            augmented_s = augmenter.augment_dataframe(s_df_normalized, ["value_variation"], 1)
             test_results['S_DataFrame'] = len(augmented_s) > 0
         except Exception as e:
             test_results['S_DataFrame'] = False
@@ -384,7 +392,9 @@ class TestDataAugmenterInit(unittest.TestCase):
         self.assertEqual(initial_summary["message"], "Aucune augmentation effectuée")
         
         # Effectuer quelques augmentations
-        pd_df = pd.read_csv(self.pd_file, sep=';')
+        pd_df = pd.read_csv(self.pd_file, sep=',')
+        # Normaliser les colonnes pour la correspondance
+        pd_df = augmenter._normalize_dataframe_columns(pd_df)
         augmenter.augment_dataframe(pd_df, ["gaussian_noise"], 2)
         
         # Vérifier le résumé après utilisation

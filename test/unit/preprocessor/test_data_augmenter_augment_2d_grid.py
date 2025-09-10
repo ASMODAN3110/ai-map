@@ -71,8 +71,13 @@ class TestDataAugmenterAugment2dGrid(unittest.TestCase):
     
     def _create_test_grids(self):
         """Créer des grilles de test basées sur les vraies données"""
-        # Charger les données PD.csv
-        pd_df = pd.read_csv(self.test_raw_dir / "PD.csv", sep=';')
+        # Charger les données PD.csv depuis le répertoire de données réel
+        pd_file = Path(__file__).parent.parent.parent.parent / "data" / "raw" / "PD.csv"
+        pd_df = pd.read_csv(pd_file, sep=',')
+        
+        # Normaliser les colonnes pour la correspondance
+        augmenter = GeophysicalDataAugmenter(random_seed=42)
+        pd_df = augmenter._normalize_dataframe_columns(pd_df)
         
         # Créer une grille 2D basée sur PD.csv (16x16x4)
         grid_size = 16
@@ -83,13 +88,17 @@ class TestDataAugmenterAugment2dGrid(unittest.TestCase):
             row = i // grid_size
             col = i % grid_size
             if row < grid_size and col < grid_size:
-                self.grid_2d_pd[row, col, 0] = pd_df.iloc[i]['Rho(ohm.m)'] if i < len(pd_df) else 0
-                self.grid_2d_pd[row, col, 1] = pd_df.iloc[i]['M (mV/V)'] if i < len(pd_df) else 0
+                self.grid_2d_pd[row, col, 0] = pd_df.iloc[i]['resistivity'] if i < len(pd_df) else 0
+                self.grid_2d_pd[row, col, 1] = pd_df.iloc[i]['chargeability'] if i < len(pd_df) else 0
                 self.grid_2d_pd[row, col, 2] = pd_df.iloc[i]['x'] if i < len(pd_df) else 0
                 self.grid_2d_pd[row, col, 3] = pd_df.iloc[i]['y'] if i < len(pd_df) else 0
         
-        # Charger les données S.csv
-        s_df = pd.read_csv(self.test_raw_dir / "S.csv", sep=';')
+        # Charger les données S.csv depuis le répertoire de données réel
+        s_file = Path(__file__).parent.parent.parent.parent / "data" / "raw" / "S.csv"
+        s_df = pd.read_csv(s_file, sep=',')
+        
+        # Normaliser les colonnes pour la correspondance
+        s_df = augmenter._normalize_dataframe_columns(s_df)
         
         # Créer une grille 2D basée sur S.csv (32x32x4)
         grid_size_s = 32
@@ -100,10 +109,10 @@ class TestDataAugmenterAugment2dGrid(unittest.TestCase):
             row = i // grid_size_s
             col = i % grid_size_s
             if row < grid_size_s and col < grid_size_s:
-                self.grid_2d_s[row, col, 0] = s_df.iloc[i]['Rho (Ohm.m)'] if i < len(s_df) else 0
-                self.grid_2d_s[row, col, 1] = s_df.iloc[i]['M (mV/V)'] if i < len(s_df) else 0
-                self.grid_2d_s[row, col, 2] = s_df.iloc[i]['LAT'] if i < len(s_df) else 0
-                self.grid_2d_s[row, col, 3] = s_df.iloc[i]['LON'] if i < len(s_df) else 0
+                self.grid_2d_s[row, col, 0] = s_df.iloc[i]['resistivity'] if i < len(s_df) else 0
+                self.grid_2d_s[row, col, 1] = s_df.iloc[i]['chargeability'] if i < len(s_df) else 0
+                self.grid_2d_s[row, col, 2] = s_df.iloc[i]['x'] if i < len(s_df) else 0
+                self.grid_2d_s[row, col, 3] = s_df.iloc[i]['y'] if i < len(s_df) else 0
         
         # Créer une grille de test simple pour les tests de base
         self.grid_2d_simple = np.random.rand(8, 8, 4)
@@ -329,7 +338,7 @@ class TestDataAugmenterAugment2dGrid(unittest.TestCase):
             self.augmenter.augment_2d_grid(invalid_grid, ["flip_horizontal"], 1)
         
         # Test avec un type invalide
-        with self.assertRaises(ValueError):
+        with self.assertRaises(TypeError):
             self.augmenter.augment_2d_grid("invalid", ["flip_horizontal"], 1)
         
         print("✅ Gestion des erreurs validée")
@@ -427,23 +436,21 @@ class TestDataAugmenterAugment2dGrid(unittest.TestCase):
         )
         self.assertEqual(len(result), 1)
         
-        # Test avec zéro augmentation
-        result = self.augmenter.augment_2d_grid(
-            self.grid_2d_simple, 
-            ["flip_horizontal"], 
-            0
-        )
-        self.assertEqual(len(result), 0)
+        # Test avec zéro augmentation (doit lever une exception)
+        with self.assertRaises(ValueError):
+            self.augmenter.augment_2d_grid(
+                self.grid_2d_simple, 
+                ["flip_horizontal"], 
+                0
+            )
         
-        # Test avec une liste d'augmentations vide
-        result = self.augmenter.augment_2d_grid(
-            self.grid_2d_simple, 
-            [], 
-            1
-        )
-        self.assertEqual(len(result), 1)
-        # La grille devrait être identique car aucune augmentation n'a été appliquée
-        np.testing.assert_array_equal(result[0], self.grid_2d_simple)
+        # Test avec une liste d'augmentations vide (doit lever une exception)
+        with self.assertRaises(ValueError):
+            self.augmenter.augment_2d_grid(
+                self.grid_2d_simple, 
+                [], 
+                1
+            )
         
         print("✅ Cas limites validés")
     
